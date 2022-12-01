@@ -5,7 +5,7 @@ with open('README.md', 'r') as infile:
     
 setuptools.setup(
     name='iris-validation',
-    version='0.0.0',
+    version='0.0.1',
     author='William Rochira',
     author_email='william.rochira@hotmail.co.uk',
     description='A package for interactive all-in-one graphical validation of 3D protein model iterations',
