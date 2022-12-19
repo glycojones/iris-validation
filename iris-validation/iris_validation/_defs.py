@@ -91,6 +91,16 @@ CONTINUOUS_METRICS = ( { 'id'            : 0,
                          'is_covariance' : True,
                          'is_molprobity' : False,
                          'is_reflections': False
+                       },
+                       { 'id'            : 7,
+                         'type'          : 'continuous',
+                         'long_name'     : 'Ramachandran z-score',
+                         'short_name'    : 'RamaZ',
+                         'ring_color'    : COLORS['ORANGE'],
+                         'polarity'      : 1,
+                         'is_covariance' : False,
+                         'is_molprobity' : False,
+                         'is_reflections': False
                        }
                      )
 
@@ -165,7 +175,8 @@ CHAIN_VIEW_RINGS   = [ DISCRETE_METRICS[0],
                        CONTINUOUS_METRICS[1],
                        CONTINUOUS_METRICS[4],
                        CONTINUOUS_METRICS[5],
-                       CONTINUOUS_METRICS[6] ]
+                       CONTINUOUS_METRICS[6],
+                       CONTINUOUS_METRICS[7] ]
 
 RESIDUE_VIEW_BOXES = [ DISCRETE_METRICS[0],
                        DISCRETE_METRICS[1],

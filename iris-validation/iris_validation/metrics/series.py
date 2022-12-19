@@ -65,7 +65,7 @@ class MetricsModelSeries():
             alignment_pair = utils.needleman_wunsch(sequences[-2], sequences[-1])
             self.chain_alignments[chain_id] = alignment_pair
 
-    def get_raw_data(self):
+    def get_raw_data(self, tortoize_results):
         if self.chain_alignments is None:
             self.align_models()
 
@@ -91,14 +91,13 @@ class MetricsModelSeries():
                            'continuous_values'  : [ ],
                            'percentile_values'  : [ ] }
 
-            for alignment_string, chain in zip(alignment_strings, chain_set):
+            for alignment_string, chain, rama_z in zip(alignment_strings, chain_set, tortoize_results):
                 residue_seqnos = [ ]
                 residue_codes = [ ]
                 residue_validities = [ ]
                 discrete_values = [ ]
                 continuous_values = [ ]
                 percentile_values = [ ]
-
                 residue_id = -1
                 for alignment_char in alignment_string:
                     if alignment_char == '-':
@@ -106,8 +105,8 @@ class MetricsModelSeries():
                         residue_codes.append(None)
                         residue_validities.append(False)
                         discrete_values.append(tuple(None for _ in range(4)))
-                        continuous_values.append(tuple(None for _ in range(7)))
-                        percentile_values.append(tuple(None for _ in range(7)))
+                        continuous_values.append(tuple(None for _ in range(8)))
+                        percentile_values.append(tuple(None for _ in range(8)))
                         continue
 
                     residue_id += 1
@@ -126,7 +125,8 @@ class MetricsModelSeries():
                                                  residue.fit_score,
                                                  residue.mainchain_fit_score,
                                                  residue.sidechain_fit_score,
-                                                 residue.covariance_score)
+                                                 residue.covariance_score,
+                                                 rama_z.get(residue_id, None))
                     residue_percentile_values = (residue.avg_b_factor_percentile,
                                                  residue.max_b_factor_percentile,
                                                  residue.std_b_factor_percentile,
