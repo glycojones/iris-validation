@@ -13,7 +13,6 @@ class ChainView():
         self.chain_index = chain_index
         self.canvas_size = canvas_size
         self.hidden = hidden
-
         self.dwg = None
         self.cfa_cache = { }
         self.num_rings = len(CHAIN_VIEW_RINGS)
@@ -24,7 +23,6 @@ class ChainView():
         self.division_size = round(self.full_radius / (self.num_rings + 2), 2)
         self.angle_delta = (2 * pi - CHAIN_VIEW_GAP_ANGLE) / self.num_segments
         self.svg_id = f'iris-chain-view-{self.chain_index}'
-
         self._draw()
 
     def _coords_from_angle(self, angle, radius, gap=True):

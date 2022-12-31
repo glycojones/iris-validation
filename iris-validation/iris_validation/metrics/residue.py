@@ -7,7 +7,7 @@ from iris_validation._defs import RAMACHANDRAN_THRESHOLDS
 
 
 class MetricsResidue():
-    def __init__(self, mmol_residue, index_in_chain=None, previous_residue=None, next_residue=None, parent_chain=None, covariance_data=None, molprobity_data=None, density_scores=None):
+    def __init__(self, mmol_residue, index_in_chain, previous_residue=None, next_residue=None, parent_chain=None, covariance_data=None, molprobity_data=None, density_scores=None, rama_z_score=None):
         self.minimol_residue = mmol_residue
         self.initialised_with_context = index_in_chain is not None
         self.index_in_chain = index_in_chain
@@ -17,6 +17,7 @@ class MetricsResidue():
         self.covariance_data = covariance_data
         self.molprobity_data = molprobity_data
         self.density_scores = density_scores
+        self.rama_z = rama_z_score
 
         self.atoms = list(mmol_residue)
         self.sequence_number = int(mmol_residue.seqnum())
@@ -99,10 +100,10 @@ class MetricsResidue():
 
         # Percentiles
         percentile_calculator = self.parent_chain.parent_model.percentile_calculator
-        self.avg_b_factor_percentile = percentile_calculator.get_percentile(0, self.avg_b_factor)
-        self.max_b_factor_percentile = percentile_calculator.get_percentile(1, self.max_b_factor)
-        self.std_b_factor_percentile = percentile_calculator.get_percentile(2, self.std_b_factor)
-        self.fit_score_percentile = percentile_calculator.get_percentile(3, self.fit_score)
-        self.mainchain_fit_score_percentile = percentile_calculator.get_percentile(4, self.mainchain_fit_score)
-        self.sidechain_fit_score_percentile = percentile_calculator.get_percentile(5, self.sidechain_fit_score)
-        self.covariance_score_percentile = percentile_calculator.get_percentile(6, self.covariance_score)
+        self.avg_b_factor_percentile = percentile_calculator.get_percentile(1, self.avg_b_factor)
+        self.max_b_factor_percentile = percentile_calculator.get_percentile(2, self.max_b_factor)
+        self.std_b_factor_percentile = percentile_calculator.get_percentile(3, self.std_b_factor)
+        self.fit_score_percentile = percentile_calculator.get_percentile(4, self.fit_score)
+        self.mainchain_fit_score_percentile = percentile_calculator.get_percentile(5, self.mainchain_fit_score)
+        self.sidechain_fit_score_percentile = percentile_calculator.get_percentile(6, self.sidechain_fit_score)
+        self.covariance_score_percentile = percentile_calculator.get_percentile(7, self.covariance_score)
