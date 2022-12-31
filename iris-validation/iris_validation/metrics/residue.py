@@ -7,7 +7,7 @@ from iris_validation._defs import RAMACHANDRAN_THRESHOLDS
 
 
 class MetricsResidue():
-    def __init__(self, mmol_residue, index_in_chain, previous_residue=None, next_residue=None, parent_chain=None, covariance_data=None, molprobity_data=None, density_scores=None, rama_z_score=None):
+    def __init__(self, mmol_residue, index_in_chain=None, previous_residue=None, next_residue=None, parent_chain=None, covariance_data=None, molprobity_data=None, density_scores=None, rama_z_score=None):
         self.minimol_residue = mmol_residue
         self.initialised_with_context = index_in_chain is not None
         self.index_in_chain = index_in_chain

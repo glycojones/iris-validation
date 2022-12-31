@@ -102,6 +102,7 @@ class MetricsModelSeries():
                 discrete_values = [ ]
                 continuous_values = [ ]
                 percentile_values = [ ]
+
                 residue_id = -1
                 for alignment_char in alignment_string:
                     if alignment_char == '-':
@@ -153,6 +154,7 @@ class MetricsModelSeries():
                 chain_data['discrete_values'].append(discrete_values)
                 chain_data['continuous_values'].append(continuous_values)
                 chain_data['percentile_values'].append(percentile_values)
+
             chain_data['discrete_values'] = list(zip(*chain_data['discrete_values']))
             chain_data['continuous_values'] = list(zip(*chain_data['continuous_values']))
             chain_data['percentile_values'] = list(zip(*chain_data['percentile_values']))

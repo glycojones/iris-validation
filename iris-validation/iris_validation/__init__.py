@@ -20,6 +20,7 @@ def generate_report(latest_model_path,
                     multiprocessing=True,
                     wrap_in_html=True,
                     output_dir=None):
+
     model_paths = (previous_model_path, latest_model_path)
     reflections_paths = (previous_reflections_path, latest_reflections_path)
     sequence_paths = (previous_sequence_path, latest_sequence_path)
@@ -36,6 +37,7 @@ def generate_report(latest_model_path,
     model_series_data = model_series.get_raw_data()
     panel = Panel(model_series_data)
     panel_string = panel.dwg.tostring()
+
     if wrap_in_html:
         panel_string = f'<!DOCTYPE html>\n<html lang="en">\n\t<head>\n\t\t<meta charset="utf-8">\n\t\t<title>Iris Report</title>\n\t</head>\n\t<body>\n\t\t{panel_string}\n\t</body>\n</html>'
 

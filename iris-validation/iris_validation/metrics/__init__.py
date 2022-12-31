@@ -290,11 +290,11 @@ def metrics_model_series_from_files(model_paths,
             result_type, model_id, result = results_queue.get()
             if result_type == 'covariance':
                 all_covariance_data[model_id] = result
-            elif result_type == 'molprobity':
+            if result_type == 'molprobity':
                 all_molprobity_data[model_id] = result
-            elif result_type == 'reflections':
+            if result_type == 'reflections':
                 all_reflections_data[model_id] = result
-            elif result_type == 'rama_z':
+            if result_type == 'rama_z':
                 all_rama_z_data[model_id] = result
 
     metrics_models = [ ]
