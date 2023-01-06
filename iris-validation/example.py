@@ -24,6 +24,7 @@ if __name__ == '__main__':
                     previous_distpred_path=ROOT_PATH.format(suffix='.npz'),
                     run_covariance=False,
                     run_molprobity=False,
+                    calculate_rama_z=True,
                     multiprocessing=True,
                     output_dir=OUTPUT_DIR)
 

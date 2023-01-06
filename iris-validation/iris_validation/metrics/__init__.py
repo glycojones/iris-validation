@@ -1,5 +1,7 @@
 from multiprocessing import Process, Queue
 
+import subprocess
+import json
 import clipper
 
 from iris_validation.utils import ONE_LETTER_CODES
@@ -173,12 +175,36 @@ def _get_covariance_data(model_path,
     return covariance_data
 
 
+def _get_tortoize_data(model_path, model_id=None, out_queue=None):
+    rama_z_data = {}
+    try:
+        tortoize_process = subprocess.Popen(
+            f'tortoize {model_path}',
+            shell=True,
+            stdout=subprocess.PIPE)
+    except Exception:
+        print('WARNING: Failed to run tortoize')
+        return
+
+    tortoize_output = tortoize_process.communicate()[0]
+    tortoize_dict = json.loads(tortoize_output)
+    residues = tortoize_dict["model"]["1"]["residues"]
+    for res in residues:
+        chain_rama_z_data = rama_z_data.setdefault(res['pdb']['strandID'], {})
+        chain_rama_z_data[res['pdb']['seqNum']] = res['ramachandran']['z-score']
+
+    if out_queue is not None:
+        out_queue.put(('rama_z', model_id, rama_z_data))
+
+    return rama_z_data
+
 def metrics_model_series_from_files(model_paths,
                                     reflections_paths=None,
                                     sequence_paths=None,
                                     distpred_paths=None,
                                     run_covariance=False,
                                     run_molprobity=False,
+                                    calculate_rama_z=True,
                                     multiprocessing=True):
     try:
         if isinstance(model_paths, str):
@@ -201,6 +227,7 @@ def metrics_model_series_from_files(model_paths,
     all_covariance_data = [ ]
     all_molprobity_data = [ ]
     all_reflections_data = [ ]
+    all_rama_z_data = [ ]
     num_queued = 0
     results_queue = Queue()
     for model_id, file_paths in enumerate(zip(*path_lists)):
@@ -210,6 +237,7 @@ def metrics_model_series_from_files(model_paths,
         covariance_data = None
         molprobity_data = None
         reflections_data = None
+        rama_z_data = None
         if run_covariance:
             if multiprocessing:
                 p = Process(target=_get_covariance_data,
@@ -240,11 +268,22 @@ def metrics_model_series_from_files(model_paths,
                 num_queued += 1
             else:
                 reflections_data = _get_reflections_data(model_path, reflections_path)
+        if calculate_rama_z:
+            if multiprocessing:
+                p = Process(target=_get_tortoize_data,
+                            args=(model_path,),
+                            kwargs={ 'model_id': model_id,
+                                     'out_queue': results_queue })
+                p.start()
+                num_queued += 1
+            else:
+                rama_z_data = _get_tortoize_data(model_path)
 
         all_minimol_data.append(minimol)
         all_covariance_data.append(covariance_data)
         all_molprobity_data.append(molprobity_data)
         all_reflections_data.append(reflections_data)
+        all_rama_z_data.append(rama_z_data)
 
     if multiprocessing:
         for _ in range(num_queued):
@@ -253,11 +292,13 @@ def metrics_model_series_from_files(model_paths,
                 all_covariance_data[model_id] = result
             if result_type == 'molprobity':
                 all_molprobity_data[model_id] = result
-            elif result_type == 'reflections':
+            if result_type == 'reflections':
                 all_reflections_data[model_id] = result
+            if result_type == 'rama_z':
+                all_rama_z_data[model_id] = result
 
     metrics_models = [ ]
-    for model_id, model_data in enumerate(zip(all_minimol_data, all_covariance_data, all_molprobity_data, all_reflections_data)):
+    for model_id, model_data in enumerate(zip(all_minimol_data, all_covariance_data, all_molprobity_data, all_reflections_data, all_rama_z_data)):
         metrics_model = MetricsModel(*model_data)
         metrics_models.append(metrics_model)
 
