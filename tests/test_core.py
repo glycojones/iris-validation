@@ -4,8 +4,8 @@ import time
 from iris_validation import generate_report
 
 
-INPUT_DIR = './example_input/'
-OUTPUT_DIR = './example_report/'
+INPUT_DIR = './test_data/'
+OUTPUT_DIR = './test_output/'
 
 PDB_ID = '2a0x'
 ROOT_PATH = str(os.path.join(INPUT_DIR, PDB_ID)) + '{suffix}'
