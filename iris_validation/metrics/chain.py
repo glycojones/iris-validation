@@ -2,12 +2,13 @@ from iris_validation.metrics.residue import MetricsResidue
 
 
 class MetricsChain():
-    def __init__(self, mmol_chain, parent_model=None, covariance_data=None, molprobity_data=None, density_scores=None):
+    def __init__(self, mmol_chain, parent_model=None, covariance_data=None, molprobity_data=None, density_scores=None, rama_z_data=None):
         self.minimol_chain = mmol_chain
         self.parent_model = parent_model
         self.covariance_data = covariance_data
         self.molprobity_data = molprobity_data
         self.density_scores = density_scores
+        self.rama_z_data = rama_z_data
 
         self._index = -1
         self.residues = [ ]
@@ -21,7 +22,17 @@ class MetricsChain():
             residue_covariance_data = None if covariance_data is None else covariance_data[seq_num]
             residue_molprobity_data = None if molprobity_data is None else molprobity_data[seq_num]
             residue_density_scores = None if density_scores is None else density_scores[seq_num]
-            residue = MetricsResidue(mmol_residue, residue_index, previous_residue, next_residue, self, residue_covariance_data, residue_molprobity_data, residue_density_scores)
+            residue_rama_z_score = None if rama_z_data is None else rama_z_data.get(seq_num, None)
+            residue = MetricsResidue(
+                mmol_residue,
+                residue_index,
+                previous_residue,
+                next_residue,
+                self,
+                residue_covariance_data,
+                residue_molprobity_data,
+                residue_density_scores,
+                residue_rama_z_score)
             self.residues.append(residue)
 
         for residue_index, residue in enumerate(self.residues):

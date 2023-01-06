@@ -73,6 +73,8 @@ class MetricsModelSeries():
         has_covariance = self.metrics_models[0].covariance_data is not None
         has_molprobity = self.metrics_models[0].molprobity_data is not None
         has_reflections = self.metrics_models[0].reflections_data is not None
+        has_rama_z = self.metrics_models[0].rama_z_data is not None
+        has_rama_classification = not has_rama_z
 
         raw_data = [ ]
         for chain_id, chain_set in self.chain_sets.items():
@@ -83,6 +85,8 @@ class MetricsModelSeries():
                            'has_covariance'     : has_covariance,
                            'has_molprobity'     : has_molprobity,
                            'has_reflections'    : has_reflections,
+                           'has_rama_z'         : has_rama_z,
+                           'has_rama_classification': has_rama_classification,
                            'aligned_length'     : aligned_length,
                            'residue_seqnos'     : [ ],
                            'residue_codes'      : [ ],
@@ -106,8 +110,8 @@ class MetricsModelSeries():
                         residue_codes.append(None)
                         residue_validities.append(False)
                         discrete_values.append(tuple(None for _ in range(4)))
-                        continuous_values.append(tuple(None for _ in range(7)))
-                        percentile_values.append(tuple(None for _ in range(7)))
+                        continuous_values.append(tuple(None for _ in range(8)))
+                        percentile_values.append(tuple(None for _ in range(8)))
                         continue
 
                     residue_id += 1
@@ -120,7 +124,8 @@ class MetricsModelSeries():
                                                residue.discrete_indicators['ramachandran'],
                                                residue.discrete_indicators['clash'],
                                                residue.discrete_indicators['cmo'])
-                    residue_continuous_values = (residue.avg_b_factor,
+                    residue_continuous_values = (residue.rama_z,
+                                                 residue.avg_b_factor,
                                                  residue.max_b_factor,
                                                  residue.std_b_factor,
                                                  residue.fit_score,
