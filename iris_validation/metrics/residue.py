@@ -100,10 +100,11 @@ class MetricsResidue():
 
         # Percentiles
         percentile_calculator = self.parent_chain.parent_model.percentile_calculator
-        self.avg_b_factor_percentile = percentile_calculator.get_percentile(1, self.avg_b_factor)
-        self.max_b_factor_percentile = percentile_calculator.get_percentile(2, self.max_b_factor)
-        self.std_b_factor_percentile = percentile_calculator.get_percentile(3, self.std_b_factor)
-        self.fit_score_percentile = percentile_calculator.get_percentile(4, self.fit_score)
-        self.mainchain_fit_score_percentile = percentile_calculator.get_percentile(5, self.mainchain_fit_score)
-        self.sidechain_fit_score_percentile = percentile_calculator.get_percentile(6, self.sidechain_fit_score)
-        self.covariance_score_percentile = percentile_calculator.get_percentile(7, self.covariance_score)
+        self.avg_b_factor_percentile = percentile_calculator.get_percentile(0, self.avg_b_factor)
+        self.max_b_factor_percentile = percentile_calculator.get_percentile(1, self.max_b_factor)
+        self.std_b_factor_percentile = percentile_calculator.get_percentile(2, self.std_b_factor)
+        self.fit_score_percentile = percentile_calculator.get_percentile(3, self.fit_score)
+        self.mainchain_fit_score_percentile = percentile_calculator.get_percentile(4, self.mainchain_fit_score)
+        self.sidechain_fit_score_percentile = percentile_calculator.get_percentile(5, self.sidechain_fit_score)
+        self.covariance_score_percentile = percentile_calculator.get_percentile(6, self.covariance_score)
+        # self.rama_z_score_percentile = percentile_calculator.get_percentile(7, self.rama_z)
