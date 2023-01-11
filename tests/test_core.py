@@ -1,5 +1,6 @@
 import os
 import time
+from os import path
 
 from iris_validation import generate_report
 
@@ -27,6 +28,7 @@ if __name__ == '__main__':
                     calculate_rama_z=True,
                     multiprocessing=True,
                     output_dir=OUTPUT_DIR)
+    assert path.exists(OUTPUT_DIR)
 
     t1 = time.time()
     print('Time taken:', round(t1-t0, 2), 's')
