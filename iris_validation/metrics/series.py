@@ -124,14 +124,14 @@ class MetricsModelSeries():
                                                residue.discrete_indicators['ramachandran'],
                                                residue.discrete_indicators['clash'],
                                                residue.discrete_indicators['cmo'])
-                    residue_continuous_values = (residue.rama_z,
-                                                 residue.avg_b_factor,
+                    residue_continuous_values = (residue.avg_b_factor,
                                                  residue.max_b_factor,
                                                  residue.std_b_factor,
                                                  residue.fit_score,
                                                  residue.mainchain_fit_score,
                                                  residue.sidechain_fit_score,
-                                                 residue.covariance_score)
+                                                 residue.covariance_score,
+                                                 residue.rama_z)
                     residue_percentile_values = (residue.avg_b_factor_percentile,
                                                  residue.max_b_factor_percentile,
                                                  residue.std_b_factor_percentile,
