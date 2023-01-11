@@ -5,7 +5,7 @@ with open('README.md', 'r') as infile:
 
 setuptools.setup(
     name='iris-validation',
-    version='0.2.0c',
+    version='0.2.1',
     author='William Rochira',
     author_email='william.rochira@hotmail.co.uk',
     maintainer='Ali Khan',
@@ -24,5 +24,6 @@ setuptools.setup(
         'Programming Language :: Python :: 3.7',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent' ],
-    python_requires='>=3'
+    python_requires='>=3',
+    install_requires="svgwrite"
 )
