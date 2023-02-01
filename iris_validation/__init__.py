@@ -16,7 +16,7 @@ def generate_report(latest_model_path,
                     previous_distpred_path=None,
                     run_covariance=False,
                     run_molprobity=False,
-                    calculate_rama_z=True,
+                    calculate_tortoize=True,
                     multiprocessing=True,
                     wrap_in_html=True,
                     output_dir=None):
@@ -32,7 +32,7 @@ def generate_report(latest_model_path,
                                                    distpred_paths,
                                                    run_covariance,
                                                    run_molprobity,
-                                                   calculate_rama_z,
+                                                   calculate_tortoize,
                                                    multiprocessing)
     model_series_data = model_series.get_raw_data()
     panel = Panel(model_series_data)

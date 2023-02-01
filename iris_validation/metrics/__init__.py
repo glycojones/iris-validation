@@ -1,5 +1,6 @@
 from multiprocessing import Process, Queue
 
+import collections
 import subprocess
 import json
 import clipper
@@ -176,7 +177,8 @@ def _get_covariance_data(model_path,
 
 
 def _get_tortoize_data(model_path, model_id=None, out_queue=None):
-    rama_z_data = {}
+    tortoize_datum = collections.namedtuple('tortoize_datum', ['rama_z', 'rota_z'])
+    tortoize_data = collections.defaultdict(tortoize_datum)
     try:
         tortoize_process = subprocess.Popen(
             f'tortoize {model_path}',
@@ -190,13 +192,15 @@ def _get_tortoize_data(model_path, model_id=None, out_queue=None):
     tortoize_dict = json.loads(tortoize_output)
     residues = tortoize_dict["model"]["1"]["residues"]
     for res in residues:
-        chain_rama_z_data = rama_z_data.setdefault(res['pdb']['strandID'], {})
-        chain_rama_z_data[res['pdb']['seqNum']] = res['ramachandran']['z-score']
-
+        chain_tortoize_data = tortoize_data.setdefault(res['pdb']['strandID'], {})
+        chain_tortoize_data[res['pdb']['seqNum']] = tortoize_datum(
+            rama_z=res['ramachandran']['z-score'],
+            rota_z=None if ('torsion' not in res or res['torsion']['z-score'] > 3) else res['torsion']['z-score'])
     if out_queue is not None:
-        out_queue.put(('rama_z', model_id, rama_z_data))
+        out_queue.put(('tortoize', model_id, tortoize_data))
 
-    return rama_z_data
+    return tortoize_data
+
 
 def metrics_model_series_from_files(model_paths,
                                     reflections_paths=None,
@@ -204,7 +208,7 @@ def metrics_model_series_from_files(model_paths,
                                     distpred_paths=None,
                                     run_covariance=False,
                                     run_molprobity=False,
-                                    calculate_rama_z=True,
+                                    calculate_tortoize=True,
                                     multiprocessing=True):
     try:
         if isinstance(model_paths, str):
@@ -227,7 +231,7 @@ def metrics_model_series_from_files(model_paths,
     all_covariance_data = [ ]
     all_molprobity_data = [ ]
     all_reflections_data = [ ]
-    all_rama_z_data = [ ]
+    all_tortoize_data = [ ]
     num_queued = 0
     results_queue = Queue()
     for model_id, file_paths in enumerate(zip(*path_lists)):
@@ -237,7 +241,7 @@ def metrics_model_series_from_files(model_paths,
         covariance_data = None
         molprobity_data = None
         reflections_data = None
-        rama_z_data = None
+        tortoize_data = None
         if run_covariance:
             if multiprocessing:
                 p = Process(target=_get_covariance_data,
@@ -268,7 +272,7 @@ def metrics_model_series_from_files(model_paths,
                 num_queued += 1
             else:
                 reflections_data = _get_reflections_data(model_path, reflections_path)
-        if calculate_rama_z:
+        if calculate_tortoize:
             if multiprocessing:
                 p = Process(target=_get_tortoize_data,
                             args=(model_path,),
@@ -277,13 +281,13 @@ def metrics_model_series_from_files(model_paths,
                 p.start()
                 num_queued += 1
             else:
-                rama_z_data = _get_tortoize_data(model_path)
+                tortoize_data = _get_tortoize_data(model_path)
 
         all_minimol_data.append(minimol)
         all_covariance_data.append(covariance_data)
         all_molprobity_data.append(molprobity_data)
         all_reflections_data.append(reflections_data)
-        all_rama_z_data.append(rama_z_data)
+        all_tortoize_data.append(tortoize_data)
 
     if multiprocessing:
         for _ in range(num_queued):
@@ -294,11 +298,17 @@ def metrics_model_series_from_files(model_paths,
                 all_molprobity_data[model_id] = result
             if result_type == 'reflections':
                 all_reflections_data[model_id] = result
-            if result_type == 'rama_z':
-                all_rama_z_data[model_id] = result
+            if result_type == 'tortoize':
+                all_tortoize_data[model_id] = result
 
     metrics_models = [ ]
-    for model_id, model_data in enumerate(zip(all_minimol_data, all_covariance_data, all_molprobity_data, all_reflections_data, all_rama_z_data)):
+    for model_id, model_data in enumerate(zip(
+        all_minimol_data,
+        all_covariance_data,
+        all_molprobity_data,
+        all_reflections_data,
+        all_tortoize_data)):
+
         metrics_model = MetricsModel(*model_data)
         metrics_models.append(metrics_model)
 
