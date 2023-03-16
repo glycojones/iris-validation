@@ -53,6 +53,7 @@ def _get_molprobity_data(model_path, seq_nums, model_id=None, out_queue=None):
     except (ImportError, ModuleNotFoundError):
         print('WARNING: Failed to import MolProbity; continuing without MolProbity analyses')
         return
+
     try:
         cmdline = load_model_and_data(
             args=[ f'pdb.file_name="{model_path}"', 'quiet=True' ],
