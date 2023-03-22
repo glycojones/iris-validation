@@ -1,8 +1,17 @@
 from iris_validation.metrics.residue import MetricsResidue
 
 
-class MetricsChain():
-    def __init__(self, mmol_chain, parent_model=None, covariance_data=None, molprobity_data=None, density_scores=None, rama_z_data=None):
+class MetricsChain:
+    def __init__(
+        self,
+        mmol_chain,
+        parent_model=None,
+        covariance_data=None,
+        molprobity_data=None,
+        density_scores=None,
+        rama_z_data=None,
+        check_resnum=False,
+    ):
         self.minimol_chain = mmol_chain
         self.parent_model = parent_model
         self.covariance_data = covariance_data
@@ -11,18 +20,78 @@ class MetricsChain():
         self.rama_z_data = rama_z_data
 
         self._index = -1
-        self.residues = [ ]
+        self.residues = []
         self.length = len(mmol_chain)
         self.chain_id = str(mmol_chain.id().trim())
 
         for residue_index, mmol_residue in enumerate(mmol_chain):
-            previous_residue = mmol_chain[residue_index-1] if residue_index > 0 else None
-            next_residue = mmol_chain[residue_index+1] if residue_index < len(mmol_chain)-1 else None
+            previous_residue = (
+                mmol_chain[residue_index - 1] if residue_index > 0 else None
+            )
+            next_residue = (
+                mmol_chain[residue_index + 1]
+                if residue_index < len(mmol_chain) - 1
+                else None
+            )
             seq_num = int(mmol_residue.seqnum())
-            residue_covariance_data = None if covariance_data is None else covariance_data[seq_num]
-            residue_molprobity_data = None if molprobity_data is None else molprobity_data[seq_num]
-            residue_density_scores = None if density_scores is None else density_scores[seq_num]
-            residue_rama_z_score = None if rama_z_data is None else rama_z_data.get(seq_num, None)
+            res_id = str(mmol_residue.id()).strip()
+            # covariance
+            if covariance_data is None:
+                residue_covariance_data = None
+            else:
+                if check_resnum:
+                    try:
+                        residue_covariance_data = covariance_data[res_id]
+                    except KeyError:
+                        try:
+                            residue_covariance_data = covariance_data[mmol_residue.id()]
+                        except KeyError:
+                            residue_covariance_data = None
+                else:
+                    residue_covariance_data = covariance_data[seq_num]
+            # molprobity
+            if molprobity_data is None:
+                residue_molprobity_data = None
+            else:
+                if check_resnum:
+                    try:
+                        residue_molprobity_data = molprobity_data[res_id]
+                    except KeyError:
+                        try:
+                            residue_molprobity_data = molprobity_data[mmol_residue.id()]
+                        except KeyError:
+                            residue_molprobity_data = None
+                else:
+                    residue_molprobity_data = molprobity_data[seq_num]
+            # density scores
+            if density_scores is None:
+                residue_density_scores = None
+            else:
+                if check_resnum:
+                    try:
+                        residue_density_scores = density_scores[res_id]
+                    except KeyError:
+                        try:
+                            residue_density_scores = density_scores[mmol_residue.id()]
+                        except KeyError:
+                            residue_density_scores = None
+                else:
+                    residue_density_scores = density_scores[seq_num]
+            # rama_z
+            if rama_z_data is None:
+                residue_rama_z_score = None
+            else:
+                if check_resnum:
+                    try:
+                        residue_rama_z_score = rama_z_data[res_id]
+                    except KeyError:
+                        try:
+                            residue_rama_z_score = rama_z_data[mmol_residue.id()]
+                        except KeyError:
+                            residue_rama_z_score = None
+                else:
+                    residue_rama_z_score = rama_z_data.get(seq_num, None)
+
             residue = MetricsResidue(
                 mmol_residue,
                 residue_index,
@@ -32,13 +101,24 @@ class MetricsChain():
                 residue_covariance_data,
                 residue_molprobity_data,
                 residue_density_scores,
-                residue_rama_z_score)
+                residue_rama_z_score,
+            )
             self.residues.append(residue)
 
         for residue_index, residue in enumerate(self.residues):
-            if (0 < residue_index < len(self.residues)-1) and \
-               (self.residues[residue_index-1].is_aa and residue.is_aa and self.residues[residue_index+1].is_aa) and \
-               (self.residues[residue_index-1].sequence_number+1 == residue.sequence_number == self.residues[residue_index+1].sequence_number-1):
+            if (
+                (0 < residue_index < len(self.residues) - 1)
+                and (
+                    self.residues[residue_index - 1].is_aa
+                    and residue.is_aa
+                    and self.residues[residue_index + 1].is_aa
+                )
+                and (
+                    self.residues[residue_index - 1].sequence_number + 1
+                    == residue.sequence_number
+                    == self.residues[residue_index + 1].sequence_number - 1
+                )
+            ):
                 residue.is_consecutive_aa = True
             else:
                 residue.is_consecutive_aa = False
@@ -47,29 +127,35 @@ class MetricsChain():
         return self
 
     def __next__(self):
-        if self._index < self.length-1:
+        if self._index < self.length - 1:
             self._index += 1
             return self.residues[self._index]
         self._index = -1
         raise StopIteration
 
     def get_residue(self, sequence_number):
-        return next(residue for residue in self.residues if residue.sequence_number == sequence_number)
+        return next(
+            residue
+            for residue in self.residues
+            if residue.sequence_number == sequence_number
+        )
 
     def remove_residue(self, residue):
         if residue in self.residues:
             self.residues.remove(residue)
             self.length -= 1
         else:
-            print('Error removing residue, no matching residue was found.')
+            print("Error removing residue, no matching residue was found.")
 
     def remove_non_aa_residues(self):
-        non_aa_residues = [ residue for residue in self.residues if not residue.is_aa ]
+        non_aa_residues = [residue for residue in self.residues if not residue.is_aa]
         for residue in non_aa_residues:
             self.remove_residue(residue)
 
     def b_factor_lists(self):
-        all_bfs, aa_bfs, mc_bfs, sc_bfs, non_aa_bfs, water_bfs, ligand_bfs, ion_bfs = [ [ ] for _ in range(8) ]
+        all_bfs, aa_bfs, mc_bfs, sc_bfs, non_aa_bfs, water_bfs, ligand_bfs, ion_bfs = [
+            [] for _ in range(8)
+        ]
         for residue in self.residues:
             all_bfs.append(residue.avg_b_factor)
             if residue.is_aa:
@@ -85,4 +171,13 @@ class MetricsChain():
                     ligand_bfs.append(residue.avg_b_factor)
                 else:
                     ion_bfs.append(residue.avg_b_factor)
-        return all_bfs, aa_bfs, mc_bfs, sc_bfs, non_aa_bfs, water_bfs, ligand_bfs, ion_bfs
+        return (
+            all_bfs,
+            aa_bfs,
+            mc_bfs,
+            sc_bfs,
+            non_aa_bfs,
+            water_bfs,
+            ligand_bfs,
+            ion_bfs,
+        )
