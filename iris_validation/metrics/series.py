@@ -153,7 +153,6 @@ class MetricsModelSeries:
                         residue.covariance_score,
                         residue.rama_z,
                     )
-                    print(residue_continuous_values)
                     residue_percentile_values = (
                         residue.avg_b_factor_percentile,
                         residue.max_b_factor_percentile,

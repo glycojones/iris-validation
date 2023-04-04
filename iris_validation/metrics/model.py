@@ -18,7 +18,6 @@ class MetricsModel:
         self.molprobity_data = molprobity_data
         self.reflections_data = reflections_data
         self.rama_z_data = rama_z_data
-        print(rama_z_data)
 
         self._index = -1
         self.minimol_chains = list(mmol_model.model())
@@ -43,7 +42,6 @@ class MetricsModel:
                 None if self.density_scores is None else self.density_scores[chain_id]
             )
             chain_rama_z_data = None if rama_z_data is None else rama_z_data[chain_id]
-            print(chain_rama_z_data)
             chain = MetricsChain(
                 mmol_chain,
                 self,

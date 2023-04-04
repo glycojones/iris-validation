@@ -22,6 +22,8 @@ def generate_report(
     multiprocessing=True,
     latest_model_metrics_json=None,
     previous_model_metrics_json=None,
+    discrete_metrics_to_display=None,
+    continuous_metrics_to_display=None,
     wrap_in_html=True,
     output_dir=None,
 ):
@@ -44,7 +46,11 @@ def generate_report(
         multiprocessing,
     )
     model_series_data = model_series.get_raw_data()
-    panel = Panel(model_series_data)
+    panel = Panel(
+        model_series_data,
+        continuous_metrics_to_display=continuous_metrics_to_display,
+        discrete_metrics_to_display=discrete_metrics_to_display,
+    )
     panel_string = panel.dwg.tostring()
 
     if wrap_in_html:

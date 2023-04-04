@@ -13,6 +13,8 @@ from iris_validation._defs import (
     RESIDUE_VIEW_BOXES,
     RESIDUE_VIEW_BARS,
     CHAIN_VIEW_GAP_ANGLE,
+    DISCRETE_METRICS,
+    CONTINUOUS_METRICS,
 )
 
 
@@ -22,10 +24,21 @@ JS_INTERACTION_PATH = os.path.join(JS_PATH, "interaction.js")
 
 
 class Panel:
-    def __init__(self, data, canvas_size=(1500, 1000)):
+    def __init__(
+        self,
+        data,
+        canvas_size=(1500, 1000),
+        continuous_metrics_to_display=None,
+        discrete_metrics_to_display=None,
+    ):
         self.data = data
         self.canvas_size = canvas_size
-
+        self.chain_view_rings = CHAIN_VIEW_RINGS
+        if continuous_metrics_to_display:
+            self.chain_view_rings = self.get_chain_view_rings(
+                continuous_metrics_to_display,
+                discrete_metrics_to_display=discrete_metrics_to_display,
+            )
         self.dwg = None
         self.javascript = None
         self.chain_views = None
@@ -42,8 +55,12 @@ class Panel:
 
     # TODO: Make this nicer
     def _verify_chosen_metrics(self):
-        global CHAIN_VIEW_RINGS, RESIDUE_VIEW_BOXES, RESIDUE_VIEW_BARS
-        for metric_list in (CHAIN_VIEW_RINGS, RESIDUE_VIEW_BOXES, RESIDUE_VIEW_BARS):
+        global RESIDUE_VIEW_BOXES, RESIDUE_VIEW_BARS
+        for metric_list in (
+            self.chain_view_rings,
+            RESIDUE_VIEW_BOXES,
+            RESIDUE_VIEW_BARS,
+        ):
             if not isinstance(metric_list, list):
                 raise ValueError("Chosen metrics in the _defs.py file must be lists")
             for metric_index in reversed(range(len(metric_list))):
@@ -104,7 +121,12 @@ class Panel:
     def _generate_subviews(self):
         self.chain_views = []
         for chain_index, chain_data in enumerate(self.data):
-            chain_view = ChainView(chain_data, chain_index, hidden=chain_index > 0).dwg
+            chain_view = ChainView(
+                chain_data,
+                chain_index,
+                hidden=chain_index > 0,
+                ChainViewRings_inp=self.chain_view_rings,
+            ).dwg
             self.chain_views.append(chain_view)
         self.residue_view = ResidueView().dwg
 
@@ -404,3 +426,25 @@ class Panel:
             "viewBox"
         ] = f"{width_buffer} {height_buffer} {viewbox_width} {viewbox_height}"
         self.dwg.add(self.residue_view)
+
+    def get_chain_view_rings(
+        self, continuous_metrics_to_display, discrete_metrics_to_display=None
+    ):
+        chain_view = []
+        # add discrete types first
+        if discrete_metrics_to_display:
+            for metric_name in discrete_metrics_to_display:
+                for metric_info in DISCRETE_METRICS:
+                    if metric_info["short_name"] == metric_name:
+                        chain_view.append(metric_info)
+                        break
+        else:
+            for metric_info in CHAIN_VIEW_RINGS:
+                if metric_info["type"] == "discrete":
+                    chain_view.append(metric_info)
+        for metric_name in continuous_metrics_to_display:
+            for metric_info in CONTINUOUS_METRICS:
+                if metric_info["short_name"] == metric_name:
+                    chain_view.append(metric_info)
+                    break
+        return chain_view

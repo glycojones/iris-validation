@@ -223,7 +223,6 @@ def _get_tortoize_data(model_path, model_id=None, out_queue=None):
 
     if out_queue is not None:
         out_queue.put(("rama_z", model_id, rama_z_data))
-    print(rama_z_data)
     return rama_z_data
 
 
@@ -238,7 +237,6 @@ def metrics_model_series_from_files(
     model_json_paths=None,
     multiprocessing=True,
 ):
-    print(model_paths)
     try:
         if isinstance(model_paths, str):
             model_paths = [model_paths]
@@ -257,7 +255,6 @@ def metrics_model_series_from_files(
         distpred_paths,
         model_json_paths,
     ]
-    print(path_lists)
     for i in range(1, len(path_lists)):
         if path_lists[i] is None:
             path_lists[i] = tuple([None for _ in model_paths])
