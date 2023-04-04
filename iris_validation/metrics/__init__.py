@@ -204,8 +204,8 @@ def _get_covariance_data(
     return covariance_data
 
 
-def _get_tortoize_data(model_path, model_id=None, out_queue=None):
-    rama_z_data = {}
+def _get_tortoize_data(model_path, seq_nums, model_id=None, out_queue=None):
+    rama_z_data = {chain_id: {} for chain_id in seq_nums.keys()}
     try:
         tortoize_process = subprocess.Popen(
             f"tortoize {model_path}", shell=True, stdout=subprocess.PIPE
@@ -218,8 +218,9 @@ def _get_tortoize_data(model_path, model_id=None, out_queue=None):
     tortoize_dict = json.loads(tortoize_output)
     residues = tortoize_dict["model"]["1"]["residues"]
     for res in residues:
-        chain_rama_z_data = rama_z_data.setdefault(res["pdb"]["strandID"], {})
-        chain_rama_z_data[res["pdb"]["seqNum"]] = res["ramachandran"]["z-score"]
+        rama_z_data[res["pdb"]["strandID"]][res["pdb"]["seqNum"]] = res["ramachandran"][
+            "z-score"
+        ]
 
     if out_queue is not None:
         out_queue.put(("rama_z", model_id, rama_z_data))
@@ -342,13 +343,13 @@ def metrics_model_series_from_files(
             if multiprocessing:
                 p = Process(
                     target=_get_tortoize_data,
-                    args=(model_path,),
+                    args=(model_path, seq_nums),
                     kwargs={"model_id": model_id, "out_queue": results_queue},
                 )
                 p.start()
                 num_queued += 1
             else:
-                rama_z_data = _get_tortoize_data(model_path)
+                rama_z_data = _get_tortoize_data(model_path, seq_nums)
 
         all_minimol_data.append(minimol)
         all_covariance_data.append(covariance_data)
