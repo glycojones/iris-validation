@@ -11,7 +11,9 @@ class MetricsModel:
         molprobity_data=None,
         reflections_data=None,
         rama_z_data=None,
+        bfactor_data=None,
         check_resnum=False,
+        data_with_percentiles=None,
     ):
         self.minimol_model = mmol_model
         self.covariance_data = covariance_data
@@ -42,6 +44,9 @@ class MetricsModel:
                 None if self.density_scores is None else self.density_scores[chain_id]
             )
             chain_rama_z_data = None if rama_z_data is None else rama_z_data[chain_id]
+            chain_bfactor_data = (
+                None if bfactor_data is None else bfactor_data[chain_id]
+            )
             chain = MetricsChain(
                 mmol_chain,
                 self,
@@ -49,7 +54,9 @@ class MetricsModel:
                 chain_molprobity_data,
                 chain_density_scores,
                 chain_rama_z_data,
+                chain_bfactor_data,
                 check_resnum=check_resnum,
+                data_with_percentiles=data_with_percentiles,
             )
             chain.remove_non_aa_residues()
             self.chains.append(chain)

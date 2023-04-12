@@ -22,8 +22,12 @@ def generate_report(
     multiprocessing=True,
     latest_model_metrics_json=None,
     previous_model_metrics_json=None,
+    data_with_percentiles=None,  # only works with model_metrics_json files
     discrete_metrics_to_display=None,
     continuous_metrics_to_display=None,
+    residue_bars_to_display=None,
+    percentile_bar_label=None,
+    percentile_bar_range=None,
     wrap_in_html=True,
     output_dir=None,
 ):
@@ -43,6 +47,7 @@ def generate_report(
         run_molprobity,
         calculate_rama_z,
         model_json_paths,
+        data_with_percentiles,
         multiprocessing,
     )
     model_series_data = model_series.get_raw_data()
@@ -50,6 +55,9 @@ def generate_report(
         model_series_data,
         continuous_metrics_to_display=continuous_metrics_to_display,
         discrete_metrics_to_display=discrete_metrics_to_display,
+        residue_bars_to_display=residue_bars_to_display,
+        percentile_bar_label=percentile_bar_label,
+        percentile_bar_range=percentile_bar_range,
     )
     panel_string = panel.dwg.tostring()
 

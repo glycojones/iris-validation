@@ -18,6 +18,8 @@ class MetricsResidue:
         molprobity_data=None,
         density_scores=None,
         rama_z_score=None,
+        bfact_score=None,
+        dict_ext_percentiles=None,
     ):
         self.minimol_residue = mmol_residue
         self.initialised_with_context = index_in_chain is not None
@@ -53,8 +55,12 @@ class MetricsResidue:
             self.mc_b_factor,
             self.sc_b_factor,
         ) = utils.analyse_b_factors(mmol_residue, self.is_aa, self.backbone_atoms)
+        # override precalculated
+        if bfact_score:
+            self.avg_b_factor, self.std_b_factor = bfact_score
 
         # Backbone torsion angles
+
         self.phi = (
             clipper.MMonomer.protein_ramachandran_phi(
                 self.previous_residue, mmol_residue
@@ -166,24 +172,39 @@ class MetricsResidue:
             ) = self.density_scores
         # Percentiles
         percentile_calculator = self.parent_chain.parent_model.percentile_calculator
-        self.avg_b_factor_percentile = percentile_calculator.get_percentile(
-            0, self.avg_b_factor
-        )
+        if "b-factor" in dict_ext_percentiles:
+            self.avg_b_factor_percentile = dict_ext_percentiles["b-factor"][0]
+        else:
+            self.avg_b_factor_percentile = percentile_calculator.get_percentile(
+                0, self.avg_b_factor
+            )
         self.max_b_factor_percentile = percentile_calculator.get_percentile(
             1, self.max_b_factor
         )
-        self.std_b_factor_percentile = percentile_calculator.get_percentile(
-            2, self.std_b_factor
-        )
-        self.fit_score_percentile = percentile_calculator.get_percentile(
-            3, self.fit_score
-        )
-        self.mainchain_fit_score_percentile = percentile_calculator.get_percentile(
-            4, self.mainchain_fit_score
-        )
-        self.sidechain_fit_score_percentile = percentile_calculator.get_percentile(
-            5, self.sidechain_fit_score
-        )
+        if "b-factor" in dict_ext_percentiles:
+            self.std_b_factor_percentile = dict_ext_percentiles["b-factor"][1]
+        else:
+            self.std_b_factor_percentile = percentile_calculator.get_percentile(
+                2, self.std_b_factor
+            )
+        if "map_fit" in dict_ext_percentiles:
+            self.fit_score_percentile = dict_ext_percentiles["map_fit"][0]
+        else:
+            self.fit_score_percentile = percentile_calculator.get_percentile(
+                3, self.fit_score
+            )
+        if "map_fit" in dict_ext_percentiles:
+            self.mainchain_fit_score_percentile = dict_ext_percentiles["map_fit"][1]
+        else:
+            self.mainchain_fit_score_percentile = percentile_calculator.get_percentile(
+                4, self.mainchain_fit_score
+            )
+        if "map_fit" in dict_ext_percentiles:
+            self.sidechain_fit_score_percentile = dict_ext_percentiles["map_fit"][2]
+        else:
+            self.sidechain_fit_score_percentile = percentile_calculator.get_percentile(
+                5, self.sidechain_fit_score
+            )
         self.covariance_score_percentile = percentile_calculator.get_percentile(
             6, self.covariance_score
         )

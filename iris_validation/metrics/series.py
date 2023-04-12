@@ -162,7 +162,6 @@ class MetricsModelSeries:
                         residue.sidechain_fit_score_percentile,
                         residue.covariance_score_percentile,
                     )
-
                     residue_continuous_values = tuple(
                         round(x, 3) if isinstance(x, float) else x
                         for x in residue_continuous_values
@@ -180,7 +179,6 @@ class MetricsModelSeries:
                 chain_data["discrete_values"].append(discrete_values)
                 chain_data["continuous_values"].append(continuous_values)
                 chain_data["percentile_values"].append(percentile_values)
-
             chain_data["discrete_values"] = list(zip(*chain_data["discrete_values"]))
             chain_data["continuous_values"] = list(
                 zip(*chain_data["continuous_values"])

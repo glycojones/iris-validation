@@ -30,6 +30,9 @@ class Panel:
         canvas_size=(1500, 1000),
         continuous_metrics_to_display=None,
         discrete_metrics_to_display=None,
+        residue_bars_to_display=None,
+        percentile_bar_label=None,
+        percentile_bar_range=None,
     ):
         self.data = data
         self.canvas_size = canvas_size
@@ -39,6 +42,17 @@ class Panel:
                 continuous_metrics_to_display,
                 discrete_metrics_to_display=discrete_metrics_to_display,
             )
+        self.residue_view_bars = RESIDUE_VIEW_BARS
+        if residue_bars_to_display is not None:
+            self.residue_view_bars = self.get_residue_view_bars(residue_bars_to_display)
+        if percentile_bar_label:
+            self.percentile_bar_label = percentile_bar_label
+        else:
+            self.percentile_bar_label = None
+        if percentile_bar_range:
+            self.percentile_bar_range = percentile_bar_range
+        else:
+            self.percentile_bar_range = [0, 100]
         self.dwg = None
         self.javascript = None
         self.chain_views = None
@@ -55,11 +69,11 @@ class Panel:
 
     # TODO: Make this nicer
     def _verify_chosen_metrics(self):
-        global RESIDUE_VIEW_BOXES, RESIDUE_VIEW_BARS
+        global RESIDUE_VIEW_BOXES
         for metric_list in (
             self.chain_view_rings,
             RESIDUE_VIEW_BOXES,
-            RESIDUE_VIEW_BARS,
+            self.residue_view_bars,
         ):
             if not isinstance(metric_list, list):
                 raise ValueError("Chosen metrics in the _defs.py file must be lists")
@@ -93,7 +107,7 @@ class Panel:
     def _generate_javascript(self):
         json_data = json.dumps(self.data)
         num_chains = len(self.chain_ids)
-        bar_metric_ids = [metric["id"] for metric in RESIDUE_VIEW_BARS]
+        bar_metric_ids = [metric["id"] for metric in self.residue_view_bars]
         box_metric_ids = [metric["id"] for metric in RESIDUE_VIEW_BOXES]
         box_colors = json.dumps([metric["seq_colors"] for metric in RESIDUE_VIEW_BOXES])
         box_labels = json.dumps([metric["seq_labels"] for metric in RESIDUE_VIEW_BOXES])
@@ -114,6 +128,7 @@ class Panel:
             box_labels=box_labels,
             gap_degrees=gap_degrees,
             chain_selector_colors=self.swtich_colors,
+            bar_y_lim=self.percentile_bar_range,
         )
 
         self.javascript = js_constants + js_interation
@@ -128,7 +143,11 @@ class Panel:
                 ChainViewRings_inp=self.chain_view_rings,
             ).dwg
             self.chain_views.append(chain_view)
-        self.residue_view = ResidueView().dwg
+        self.residue_view = ResidueView(
+            ResidueViewBars_inp=self.residue_view_bars,
+            percentile_bar_label=self.percentile_bar_label,
+            percentile_bar_range=self.percentile_bar_range,
+        ).dwg
 
     def _draw(self):
         middle_gap = 30
@@ -448,3 +467,12 @@ class Panel:
                     chain_view.append(metric_info)
                     break
         return chain_view
+
+    def get_residue_view_bars(self, residue_bars_to_display):
+        residue_view = []
+        for metric_name in residue_bars_to_display:
+            for metric_info in CONTINUOUS_METRICS:
+                if metric_info["short_name"] == metric_name:
+                    residue_view.append(metric_info)
+                    break
+        return residue_view

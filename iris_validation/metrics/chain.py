@@ -10,7 +10,9 @@ class MetricsChain:
         molprobity_data=None,
         density_scores=None,
         rama_z_data=None,
+        bfactor_data=None,
         check_resnum=False,
+        data_with_percentiles=None,
     ):
         self.minimol_chain = mmol_chain
         self.parent_model = parent_model
@@ -23,7 +25,7 @@ class MetricsChain:
         self.residues = []
         self.length = len(mmol_chain)
         self.chain_id = str(mmol_chain.id().trim())
-
+        dict_ext_percentiles = {}  # stores the percentiles supplied externally
         for residue_index, mmol_residue in enumerate(mmol_chain):
             previous_residue = (
                 mmol_chain[residue_index - 1] if residue_index > 0 else None
@@ -43,10 +45,7 @@ class MetricsChain:
                     try:
                         residue_covariance_data = covariance_data[res_id]
                     except KeyError:
-                        try:
-                            residue_covariance_data = covariance_data[mmol_residue.id()]
-                        except KeyError:
-                            residue_covariance_data = None
+                        residue_covariance_data = None
                 else:
                     residue_covariance_data = covariance_data[seq_num]
             # molprobity
@@ -57,10 +56,7 @@ class MetricsChain:
                     try:
                         residue_molprobity_data = molprobity_data[res_id]
                     except KeyError:
-                        try:
-                            residue_molprobity_data = molprobity_data[mmol_residue.id()]
-                        except KeyError:
-                            residue_molprobity_data = None
+                        residue_molprobity_data = None
                 else:
                     residue_molprobity_data = molprobity_data[seq_num]
             # density scores
@@ -68,11 +64,15 @@ class MetricsChain:
                 residue_density_scores = None
             else:
                 if check_resnum:
-                    try:
-                        residue_density_scores = density_scores[res_id]
-                    except KeyError:
+                    if data_with_percentiles and "map_fit" in data_with_percentiles:
                         try:
-                            residue_density_scores = density_scores[mmol_residue.id()]
+                            residue_density_scores = density_scores[res_id][0]
+                            dict_ext_percentiles["map_fit"] = density_scores[res_id][-1]
+                        except KeyError:
+                            residue_density_scores = None
+                    else:
+                        try:
+                            residue_density_scores = density_scores[res_id]
                         except KeyError:
                             residue_density_scores = None
                 else:
@@ -85,13 +85,27 @@ class MetricsChain:
                     try:
                         residue_rama_z_score = rama_z_data[res_id]
                     except KeyError:
-                        try:
-                            residue_rama_z_score = rama_z_data[mmol_residue.id()]
-                        except KeyError:
-                            residue_rama_z_score = None
+                        residue_rama_z_score = None
                 else:
                     residue_rama_z_score = rama_z_data.get(seq_num, None)
-
+            # ext b-factor
+            if bfactor_data is None:
+                residue_bfact_score = None
+            else:
+                if check_resnum:
+                    if data_with_percentiles and "b-factor" in data_with_percentiles:
+                        try:
+                            residue_bfact_score = bfactor_data[res_id][0]
+                            dict_ext_percentiles["b-factor"] = bfactor_data[res_id][-1]
+                        except KeyError:
+                            residue_bfact_score = None
+                    else:
+                        try:
+                            residue_bfact_score = bfactor_data[res_id]
+                        except KeyError:
+                            residue_bfact_score = None
+                else:
+                    residue_bfact_score = bfactor_data[seq_num]
             residue = MetricsResidue(
                 mmol_residue,
                 residue_index,
@@ -102,6 +116,8 @@ class MetricsChain:
                 residue_molprobity_data,
                 residue_density_scores,
                 residue_rama_z_score,
+                residue_bfact_score,
+                dict_ext_percentiles,
             )
             self.residues.append(residue)
 

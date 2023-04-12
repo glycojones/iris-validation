@@ -236,6 +236,7 @@ def metrics_model_series_from_files(
     run_molprobity=False,
     calculate_rama_z=False,
     model_json_paths=None,
+    data_with_percentiles=None,
     multiprocessing=True,
 ):
     try:
@@ -273,6 +274,7 @@ def metrics_model_series_from_files(
     all_molprobity_data = []
     all_reflections_data = []
     all_rama_z_data = []
+    all_bfactor_data = []  # if externally supplied
     num_queued = 0
     results_queue = Queue()
     check_resnum = False
@@ -292,6 +294,7 @@ def metrics_model_series_from_files(
         molprobity_data = None
         reflections_data = None
         rama_z_data = None
+        bfactor_data = None
 
         if json_data_path:
             check_resnum = True
@@ -304,6 +307,8 @@ def metrics_model_series_from_files(
                     rama_z_data = json_data["rama_z"]
                 if metric == "map_fit":
                     reflections_data = json_data["map_fit"]
+                if metric == "b_fact":
+                    bfactor_data = json_data["b_fact"]
         if run_covariance:
             if multiprocessing:
                 p = Process(
@@ -356,6 +361,7 @@ def metrics_model_series_from_files(
         all_molprobity_data.append(molprobity_data)
         all_reflections_data.append(reflections_data)
         all_rama_z_data.append(rama_z_data)
+        all_bfactor_data.append(bfactor_data)
 
     if multiprocessing:
         for _ in range(num_queued):
@@ -376,9 +382,10 @@ def metrics_model_series_from_files(
             all_molprobity_data,
             all_reflections_data,
             all_rama_z_data,
+            all_bfactor_data,
         )
     ):
-        metrics_model = MetricsModel(*model_data, check_resnum)
+        metrics_model = MetricsModel(*model_data, check_resnum, data_with_percentiles)
         metrics_models.append(metrics_model)
 
     metrics_model_series = MetricsModelSeries(metrics_models)

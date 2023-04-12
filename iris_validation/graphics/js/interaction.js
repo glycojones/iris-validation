@@ -97,8 +97,9 @@ function getResidueViewData() {
     let y = barChartsContainer.points.getItem(pointID).y;
     bccPoints.push([x, y]);
   };
+  console.log(bccPoints);
   barOffsetY = bccPoints[2][1];
-  barMultiplierY = -(bccPoints[2][1]-bccPoints[0][1]) / 100;
+  barMultiplierY = -(bccPoints[2][1]-bccPoints[0][1]) / (bar_y_lim[1]-bar_y_lim[0]);
 
   // Boxplot ranges
   for (var versionID = 0; versionID < modelData[selectedChain]['num_versions']; ++versionID) {
@@ -120,14 +121,17 @@ function getResidueViewData() {
       let metricMax = Math.max.apply(null, allPercentileValues);
       let metricMean = mean(allPercentileValues);
       let metricStd = standardDeviation(allPercentileValues);
-      let metricLow = Math.max(0, metricMean-metricStd);
-      let metricHigh = Math.min(100, metricMean+metricStd);
+      let metricLow = Math.max(bar_y_lim[0], metricMean-metricStd);
+      let metricHigh = Math.min(bar_y_lim[1], metricMean+metricStd);
       let distributionValues = [ metricMin, metricMax, metricLow, metricMean, metricHigh ];
+      console.log(distributionValues, barMultiplierY);
       let versionLineYs = [ ];
       for (var valueID = 0; valueID < 5; ++valueID) {
-        let lineY = parseFloat((barOffsetY + barMultiplierY * distributionValues[valueID]).toFixed(1));
+        let barValueLim = Math.max(0.0, distributionValues[valueID]-bar_y_lim[0]);
+        let lineY = parseFloat((barOffsetY + barMultiplierY * barValueLim).toFixed(1));
         versionLineYs.push(lineY);
       };
+      console.log(versionLineYs);
       barLineYs[versionID].push(versionLineYs);
     };
   };
@@ -277,7 +281,9 @@ function updateSelectedResidue() {
     boxplots[barID].setAttribute('opacity', 1);
     let barValue = modelData[selectedChain]['percentile_values'][metricID][selectedVersion][selectedResidue];
     // Set main line coordinates
-    barY = parseFloat((barOffsetY + barMultiplierY * barValue).toFixed(1));
+    let barValueLim = Math.max(0.0, barValue-bar_y_lim[0]);
+    barY = parseFloat((barOffsetY + barMultiplierY * barValueLim).toFixed(1));
+    //console.log(barY);
     barMainlines[barID].setAttribute('y1', barY);
     barMainlines[barID].setAttribute('y2', barY);
     // Set bar label text and position
@@ -287,6 +293,7 @@ function updateSelectedResidue() {
     } else {
       barLabels[barID].setAttribute('y', barY+25);
     };
+    console.log(barLabels);
   };
 
   // Set summary text
