@@ -162,9 +162,9 @@ class ResidueView:
         )
 
         # Bar chart axis
-        label_step = int(
-            (self.percentile_bar_range[1] - self.percentile_bar_range[0]) / 10.0
-        )
+        label_step = (
+            self.percentile_bar_range[1] - self.percentile_bar_range[0]
+        ) / 10.0
         for label_id in range(10 + 1):
             height = (
                 bar_charts_bounds[1]
@@ -181,7 +181,7 @@ class ResidueView:
             )
             self.dwg.add(
                 self.dwg.text(
-                    str(self.percentile_bar_range[1] - label_id * label_step),
+                    str(round(self.percentile_bar_range[1] - label_id * label_step, 1)),
                     insert=(bar_charts_bounds[0] - 8, height + 5),
                     font_size=18,
                     font_family="Arial",
