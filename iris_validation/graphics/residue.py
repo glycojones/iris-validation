@@ -20,7 +20,7 @@ class ResidueView:
         if ResidueViewBars_inp:
             self.residue_view_bars = ResidueViewBars_inp
         self.box_names = [ metric['short_name'] for metric in RESIDUE_VIEW_BOXES ]
-        self.bar_names = [ metric['long_name'] for metric in RESIDUE_VIEW_BARS ]
+        self.bar_names = [ metric['long_name'] for metric in self.residue_view_bars ]
 
         # TODO: allow any number of bars
         self.bar_names = self.bar_names[:2]

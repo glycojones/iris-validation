@@ -30,9 +30,17 @@ class MetricsResidue:
         self.covariance_data = covariance_data
         self.molprobity_data = molprobity_data
         self.density_scores = density_scores
-        self.rama_z = None if not tortoize_scores else tortoize_scores.rama_z
-        self.rota_z = None if not tortoize_scores else tortoize_scores.rota_z
-
+        self.rama_z = None
+        self.rota_z = None
+        if tortoize_scores:
+            if hasattr(tortoize_scores,"rama_z"):
+                self.rama_z = tortoize_scores.rama_z
+            elif "rama_z" in tortoize_scores:
+                self.rama_z = tortoize_scores["rama_z"]
+            if hasattr(tortoize_scores,"rota_z"):
+                self.rota_z = tortoize_scores.rota_z
+            elif "rota_z" in tortoize_scores:
+                self.rota_z = tortoize_scores["rota_z"]
         self.atoms = list(mmol_residue)
         self.sequence_number = int(mmol_residue.seqnum())
         self.code = mmol_residue.type().trim()

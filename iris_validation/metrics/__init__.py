@@ -224,7 +224,7 @@ def metrics_model_series_from_files(
     except TypeError as exception:
         raise ValueError('Argument \'model_paths\' should be an iterable of filenames') from exception
 
-    path_lists = [ model_paths, reflections_paths, sequence_paths, distpred_paths ]
+    path_lists = [ model_paths, reflections_paths, sequence_paths, distpred_paths, model_json_paths ]
     for i in range(1, len(path_lists)):
         if path_lists[i] is None:
             path_lists[i] = tuple([ None for _ in model_paths ])
@@ -266,8 +266,9 @@ def metrics_model_series_from_files(
             for metric in json_data:
                 if metric == "molprobity":
                     molprobity_data = json_data["molprobity"]
-                if metric == "rama_z":
-                    rama_z_data = json_data["rama_z"]
+                if metric == "tortoize":
+                    tortoize_data = json_data["tortoize"]
+                    calculate_tortoize = False
                 if metric == "map_fit":
                     reflections_data = json_data["map_fit"]
                 if metric == "b_fact":
