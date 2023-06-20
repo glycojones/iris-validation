@@ -343,7 +343,7 @@ class Panel:
     ):
         chain_view = []
         # add discrete types first
-        if discrete_metrics_to_display:
+        if not discrete_metrics_to_display is None:
             for metric_name in discrete_metrics_to_display:
                 for metric_info in DISCRETE_METRICS:
                     if metric_info["short_name"] == metric_name:
