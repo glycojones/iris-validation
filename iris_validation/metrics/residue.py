@@ -17,7 +17,7 @@ class MetricsResidue:
         covariance_data=None,
         molprobity_data=None,
         density_scores=None,
-        rama_z_score=None,
+        tortoize_scores=None,
         bfact_score=None,
         dict_ext_percentiles=None,
     ):
@@ -30,7 +30,8 @@ class MetricsResidue:
         self.covariance_data = covariance_data
         self.molprobity_data = molprobity_data
         self.density_scores = density_scores
-        self.rama_z = rama_z_score
+        self.rama_z = None if not tortoize_scores else tortoize_scores.rama_z
+        self.rota_z = None if not tortoize_scores else tortoize_scores.rota_z
 
         self.atoms = list(mmol_residue)
         self.sequence_number = int(mmol_residue.seqnum())

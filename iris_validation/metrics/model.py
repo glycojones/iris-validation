@@ -10,7 +10,7 @@ class MetricsModel:
         covariance_data=None,
         molprobity_data=None,
         reflections_data=None,
-        rama_z_data=None,
+        tortoize_data=None,
         bfactor_data=None,
         check_resnum=False,
         data_with_percentiles=None,
@@ -19,7 +19,7 @@ class MetricsModel:
         self.covariance_data = covariance_data
         self.molprobity_data = molprobity_data
         self.reflections_data = reflections_data
-        self.rama_z_data = rama_z_data
+        self.tortoize_data = tortoize_data
 
         self._index = -1
         self.minimol_chains = list(mmol_model.model())
@@ -37,7 +37,7 @@ class MetricsModel:
             chain_covariance_data = None if covariance_data is None else covariance_data[chain_id]
             chain_molprobity_data = None if molprobity_data is None else molprobity_data[chain_id]
             chain_density_scores = None if self.density_scores is None else self.density_scores[chain_id]
-            chain_rama_z_data = None if rama_z_data is None else rama_z_data[chain_id]
+            chain_tortoize_data = None if tortoize_data is None else tortoize_data[chain_id]
             chain_bfactor_data = (
                 None if bfactor_data is None else bfactor_data[chain_id]
             )
@@ -47,7 +47,7 @@ class MetricsModel:
                 chain_covariance_data,
                 chain_molprobity_data,
                 chain_density_scores,
-                chain_rama_z_data,
+                chain_tortoize_data,
                 chain_bfactor_data,
                 check_resnum=check_resnum,
                 data_with_percentiles=data_with_percentiles,

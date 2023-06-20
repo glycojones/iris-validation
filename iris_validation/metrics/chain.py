@@ -9,7 +9,7 @@ class MetricsChain:
         covariance_data=None,
         molprobity_data=None,
         density_scores=None,
-        rama_z_data=None,
+        tortoize_data=None,
         bfactor_data=None,
         check_resnum=False,
         data_with_percentiles=None,
@@ -19,7 +19,7 @@ class MetricsChain:
         self.covariance_data = covariance_data
         self.molprobity_data = molprobity_data
         self.density_scores = density_scores
-        self.rama_z_data = rama_z_data
+        self.tortoize_data = tortoize_data
 
         self._index = -1
         self.residues = [ ]
@@ -72,16 +72,16 @@ class MetricsChain:
                 else:
                     residue_density_scores = density_scores[seq_num]
             # rama_z
-            if rama_z_data is None:
-                residue_rama_z_score = None
+            if tortoize_data is None:
+                residue_tortoize_scores = None
             else:
                 if check_resnum:
                     try:
-                        residue_rama_z_score = rama_z_data[res_id]
+                        residue_tortoize_scores = tortoize_data[res_id]
                     except KeyError:
-                        residue_rama_z_score = None
+                        residue_tortoize_scores = None
                 else:
-                    residue_rama_z_score = rama_z_data.get(seq_num, None)
+                    residue_tortoize_scores = tortoize_data.get(seq_num, None)
             # ext b-factor
             if bfactor_data is None:
                 residue_bfact_score = None
@@ -109,7 +109,7 @@ class MetricsChain:
                 residue_covariance_data,
                 residue_molprobity_data,
                 residue_density_scores,
-                residue_rama_z_score,
+                residue_tortoize_scores,
                 residue_bfact_score,
                 dict_ext_percentiles,
             )
