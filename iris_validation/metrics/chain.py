@@ -22,19 +22,13 @@ class MetricsChain:
         self.rama_z_data = rama_z_data
 
         self._index = -1
-        self.residues = []
+        self.residues = [ ]
         self.length = len(mmol_chain)
         self.chain_id = str(mmol_chain.id().trim())
         dict_ext_percentiles = {}  # stores the percentiles supplied externally
         for residue_index, mmol_residue in enumerate(mmol_chain):
-            previous_residue = (
-                mmol_chain[residue_index - 1] if residue_index > 0 else None
-            )
-            next_residue = (
-                mmol_chain[residue_index + 1]
-                if residue_index < len(mmol_chain) - 1
-                else None
-            )
+            previous_residue = mmol_chain[residue_index-1] if residue_index > 0 else None
+            next_residue = mmol_chain[residue_index+1] if residue_index < len(mmol_chain)-1 else None
             seq_num = int(mmol_residue.seqnum())
             res_id = str(mmol_residue.id()).strip()
             # covariance
@@ -122,19 +116,9 @@ class MetricsChain:
             self.residues.append(residue)
 
         for residue_index, residue in enumerate(self.residues):
-            if (
-                (0 < residue_index < len(self.residues) - 1)
-                and (
-                    self.residues[residue_index - 1].is_aa
-                    and residue.is_aa
-                    and self.residues[residue_index + 1].is_aa
-                )
-                and (
-                    self.residues[residue_index - 1].sequence_number + 1
-                    == residue.sequence_number
-                    == self.residues[residue_index + 1].sequence_number - 1
-                )
-            ):
+            if (0 < residue_index < len(self.residues)-1) and \
+               (self.residues[residue_index-1].is_aa and residue.is_aa and self.residues[residue_index+1].is_aa) and \
+               (self.residues[residue_index-1].sequence_number+1 == residue.sequence_number == self.residues[residue_index+1].sequence_number-1):
                 residue.is_consecutive_aa = True
             else:
                 residue.is_consecutive_aa = False
@@ -143,35 +127,29 @@ class MetricsChain:
         return self
 
     def __next__(self):
-        if self._index < self.length - 1:
+        if self._index < self.length-1:
             self._index += 1
             return self.residues[self._index]
         self._index = -1
         raise StopIteration
 
     def get_residue(self, sequence_number):
-        return next(
-            residue
-            for residue in self.residues
-            if residue.sequence_number == sequence_number
-        )
+        return next(residue for residue in self.residues if residue.sequence_number == sequence_number)
 
     def remove_residue(self, residue):
         if residue in self.residues:
             self.residues.remove(residue)
             self.length -= 1
         else:
-            print("Error removing residue, no matching residue was found.")
+            print('Error removing residue, no matching residue was found.')
 
     def remove_non_aa_residues(self):
-        non_aa_residues = [residue for residue in self.residues if not residue.is_aa]
+        non_aa_residues = [ residue for residue in self.residues if not residue.is_aa ]
         for residue in non_aa_residues:
             self.remove_residue(residue)
 
     def b_factor_lists(self):
-        all_bfs, aa_bfs, mc_bfs, sc_bfs, non_aa_bfs, water_bfs, ligand_bfs, ion_bfs = [
-            [] for _ in range(8)
-        ]
+        all_bfs, aa_bfs, mc_bfs, sc_bfs, non_aa_bfs, water_bfs, ligand_bfs, ion_bfs = [ [ ] for _ in range(8) ]
         for residue in self.residues:
             all_bfs.append(residue.avg_b_factor)
             if residue.is_aa:
@@ -187,13 +165,4 @@ class MetricsChain:
                     ligand_bfs.append(residue.avg_b_factor)
                 else:
                     ion_bfs.append(residue.avg_b_factor)
-        return (
-            all_bfs,
-            aa_bfs,
-            mc_bfs,
-            sc_bfs,
-            non_aa_bfs,
-            water_bfs,
-            ligand_bfs,
-            ion_bfs,
-        )
+        return all_bfs, aa_bfs, mc_bfs, sc_bfs, non_aa_bfs, water_bfs, ligand_bfs, ion_bfs

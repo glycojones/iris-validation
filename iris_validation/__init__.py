@@ -1,8 +1,5 @@
 import os
 
-# import subprocess
-# import json
-
 from iris_validation.graphics import Panel
 from iris_validation.metrics import metrics_model_series_from_files
 
@@ -70,8 +67,6 @@ def generate_report(
     if not os.path.isdir(output_dir):
         os.mkdir(output_dir)
 
-    extension = "html" if wrap_in_html else "svg"
-    with open(
-        os.path.join(output_dir, f"report.{extension}"), "w", encoding="utf8"
-    ) as outfile:
+    extension = 'html' if wrap_in_html else 'svg'
+    with open(os.path.join(output_dir, f'report.{extension}'), 'w', encoding='utf8') as outfile:
         outfile.write(panel_string)

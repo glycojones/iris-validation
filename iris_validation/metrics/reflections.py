@@ -21,9 +21,7 @@ class ReflectionsHandler:
 
         if f_reflections is None:
             if xmap is None:
-                raise ValueError(
-                    "Either a reflections file path or an xmap object must be passed as an argument"
-                )
+                raise ValueError('Either a reflections file path or an xmap object must be passed as an argument')
             try:
                 self.grid = xmap.grid
             except AttributeError:
@@ -31,16 +29,12 @@ class ReflectionsHandler:
             self.spacegroup = xmap.spacegroup
             self.cell = xmap.cell
         else:
-            extension = f_reflections.split(".")[-1].lower()
-            if extension != "mtz":
-                if extension == "cif":
-                    raise ValueError(
-                        "mmCIF format is not currently supported for reflections data."
-                    )
+            extension = f_reflections.split('.')[-1].lower()
+            if extension != 'mtz':
+                if extension == 'cif':
+                    raise ValueError('mmCIF format is not currently supported for reflections data.')
                 else:
-                    raise ValueError(
-                        f"Reflections file has unrecognised extension: {extension}"
-                    )
+                    raise ValueError(f'Reflections file has unrecognised extension: {extension}')
             self._load_hkl_data()
             self._calculate_structure_factors()
             self._generate_xmap()
@@ -51,30 +45,24 @@ class ReflectionsHandler:
         mtzin.open_read(self.f_reflections)
         mtzin.import_hkl_info(self.hkl)
 
-        mtz_labels_and_types = [
-            tuple(str(line).strip().split(" ")) for line in mtzin.column_labels()
-        ]
+        mtz_labels_and_types = [ tuple(str(line).strip().split(' ')) for line in mtzin.column_labels() ]
         mtz_column_labels, _ = zip(*mtz_labels_and_types)
-        mtz_column_label_suffixes = set(
-            [label.split("/")[-1] for label in mtz_column_labels]
-        )
+        mtz_column_label_suffixes = set([ label.split('/')[-1] for label in mtz_column_labels ])
         # TODO: need a better way to choose the right headers
         import_complete = False
-        for suffix_pair in (("F", "SIGF"), ("FP", "SIGFP"), ("FP_ALL", "SIGFP_ALL")):
+        for suffix_pair in ( ('F', 'SIGF'),
+                             ('FP', 'SIGFP'),
+                             ('FP_ALL', 'SIGFP_ALL') ):
             if len(mtz_column_label_suffixes & set(suffix_pair)) == 2:
                 try:
                     self.f_sigf = clipper.HKL_data_F_sigF_float(self.hkl)
-                    mtzin.import_hkl_data(
-                        self.f_sigf, "/*/*/[" + ",".join(suffix_pair) + "]"
-                    )
+                    mtzin.import_hkl_data(self.f_sigf, '/*/*/[' + ','.join(suffix_pair) + ']')
                     import_complete = True
                     break
                 except Exception as exception:
-                    raise Exception(
-                        "Failed to import HKL data from reflections file"
-                    ) from exception
+                    raise Exception('Failed to import HKL data from reflections file') from exception
         if not import_complete:
-            raise ValueError("Reflections file does not contain the required columns")
+            raise ValueError('Reflections file does not contain the required columns')
         mtzin.close_read()
 
         spacegroup = self.hkl.spacegroup()
@@ -87,15 +75,11 @@ class ReflectionsHandler:
         self.resolution_limit = resolution.limit()
 
     def _calculate_structure_factors(self, bulk_solvent=True):
-        # self.crystal = clipper.MTZcrystal()
-        # self.f_phi = clipper.HKL_data_F_phi_float(self.hkl, self.crystal)
+        #self.crystal = clipper.MTZcrystal()
+        #self.f_phi = clipper.HKL_data_F_phi_float(self.hkl, self.crystal)
         self.f_phi = clipper.HKL_data_F_phi_float(self.hkl)
         atoms = self.minimol.atom_list()
-        sf_calc = (
-            clipper.SFcalc_obs_bulk_float
-            if bulk_solvent
-            else clipper.SFcalc_obs_base_float
-        )
+        sf_calc = clipper.SFcalc_obs_bulk_float if bulk_solvent else clipper.SFcalc_obs_base_float
         sf_calc(self.f_phi, self.f_sigf, atoms)
 
     def _generate_xmap(self):
@@ -125,17 +109,13 @@ class ReflectionsHandler:
         return self.get_density_at_point(xyz)
 
     def calculate_all_density_scores(self):
-        density_scores = {}
+        density_scores = { }
         for chain in self.minimol:
             chain_id = str(chain.id()).strip()
-            density_scores[chain_id] = {}
+            density_scores[chain_id] = { }
             for residue in chain:
                 seq_num = int(residue.seqnum())
-                all_atom_scores, mainchain_atom_scores, sidechain_atom_scores = (
-                    [],
-                    [],
-                    [],
-                )
+                all_atom_scores, mainchain_atom_scores, sidechain_atom_scores = [ ], [ ], [ ]
                 for atom_id, atom in enumerate(residue):
                     is_mainchain = str(atom.name()).strip() in utils.MC_ATOM_NAMES
                     element = str(atom.element()).strip()
@@ -143,9 +123,7 @@ class ReflectionsHandler:
                     density = self.get_density_at_atom(atom)
                     atom_score = None
                     density_norm = density / atomic_number
-                    atom_score = -log(
-                        norm.cdf((density_norm - self.map_mean) / self.map_std)
-                    )
+                    atom_score = -log(norm.cdf((density_norm - self.map_mean) / self.map_std))
                     all_atom_scores.append(atom_score)
                     if is_mainchain:
                         mainchain_atom_scores.append(atom_score)
@@ -155,16 +133,8 @@ class ReflectionsHandler:
                 if len(all_atom_scores) > 0:
                     all_score = sum(all_atom_scores) / len(all_atom_scores)
                 if len(mainchain_atom_scores) > 0:
-                    mainchain_score = sum(mainchain_atom_scores) / len(
-                        mainchain_atom_scores
-                    )
+                    mainchain_score = sum(mainchain_atom_scores) / len(mainchain_atom_scores)
                 if len(sidechain_atom_scores) > 0:
-                    sidechain_score = sum(sidechain_atom_scores) / len(
-                        sidechain_atom_scores
-                    )
-                density_scores[chain_id][seq_num] = (
-                    all_score,
-                    mainchain_score,
-                    sidechain_score,
-                )
+                    sidechain_score = sum(sidechain_atom_scores) / len(sidechain_atom_scores)
+                density_scores[chain_id][seq_num] = (all_score, mainchain_score, sidechain_score)
         return density_scores
