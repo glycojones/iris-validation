@@ -1,3 +1,8 @@
+from math import acos, atan2, degrees
+
+import clipper
+
+
 THREE_LETTER_CODES = { 0 : [ 'ALA', 'GLY', 'VAL', 'LEU', 'ILE', 'PRO', 'PHE', 'TYR', 'TRP', 'SER',
                              'THR', 'CYS', 'MET', 'ASN', 'GLN', 'LYS', 'ARG', 'HIS', 'ASP', 'GLU' ],
                        1 : [ 'MSE', 'SEC' ],
