@@ -26,7 +26,7 @@ class ChainView:
 
         self.dwg = None
         self.cfa_cache = { }
-        self.num_rings = len(CHAIN_VIEW_RINGS)
+        self.num_rings = len(self.chain_view_rings)
         self.num_versions = self.data['num_versions']
         self.num_segments = self.data['aligned_length']
         self.center = (self.canvas_size[0] // 2, self.canvas_size[1] // 2)
