@@ -84,13 +84,9 @@ class Panel:
                     del metric_list[metric_index]
                 elif (metric_list[metric_index]['is_reflections'] and not self.data[0]['has_reflections']):
                     del metric_list[metric_index]
-                elif (metric_list[metric_index]['is_rama_z'] and not self.data[0]['has_tortoize']):
+                elif (metric_list[metric_index]['is_rama_z'] and not self.data[0]['has_rama_z']):
                     del metric_list[metric_index]
-                elif (metric_list[metric_index]['is_rama_classification'] and self.data[0]['has_tortoize']):
-                    del metric_list[metric_index]
-                elif (metric_list[metric_index]['is_rota_z'] and not self.data[0]['has_tortoize']):
-                    del metric_list[metric_index]
-                elif (metric_list[metric_index]['is_rota_classification'] and self.data[0]['has_tortoize']):
+                elif (metric_list[metric_index]['is_rama_classification'] and self.data[0]['has_rama_z']):
                     del metric_list[metric_index]
 
     def _generate_javascript(self):

@@ -1,6 +1,5 @@
 from multiprocessing import Process, Queue
 
-import collections
 import subprocess
 import json
 import clipper
@@ -176,9 +175,8 @@ def _get_covariance_data(model_path,
     return covariance_data
 
 
-def _get_tortoize_data(model_path, model_id=None, out_queue=None):
-    tortoize_datum = collections.namedtuple('tortoize_datum', ['rama_z', 'rota_z'])
-    tortoize_data = collections.defaultdict(tortoize_datum)
+def _get_tortoize_data(model_path, seq_nums, model_id=None, out_queue=None):
+    rama_z_data = {chain_id: {} for chain_id in seq_nums.keys()}
     try:
         tortoize_process = subprocess.Popen(
             f'tortoize {model_path}',
@@ -192,15 +190,12 @@ def _get_tortoize_data(model_path, model_id=None, out_queue=None):
     tortoize_dict = json.loads(tortoize_output)
     residues = tortoize_dict["model"]["1"]["residues"]
     for res in residues:
-        chain_tortoize_data = tortoize_data.setdefault(res['pdb']['strandID'], {})
-        chain_tortoize_data[res['pdb']['seqNum']] = tortoize_datum(
-            rama_z=res['ramachandran']['z-score'],
-            rota_z=None if ('torsion' not in res or res['torsion']['z-score'] > 3) else res['torsion']['z-score'])
+        rama_z_data[res['pdb']['strandID']][res['pdb']['seqNum']] = res['ramachandran']['z-score']
+
     if out_queue is not None:
-        out_queue.put(('tortoize', model_id, tortoize_data))
+        out_queue.put(('rama_z', model_id, rama_z_data))
 
-    return tortoize_data
-
+    return rama_z_data
 
 
 def metrics_model_series_from_files(
@@ -210,7 +205,7 @@ def metrics_model_series_from_files(
     distpred_paths=None,
     run_covariance=False,
     run_molprobity=False,
-    calculate_tortoize=True,
+    calculate_rama_z=False,
     model_json_paths=None,
     data_with_percentiles=None,
     multiprocessing=True,
@@ -236,7 +231,7 @@ def metrics_model_series_from_files(
     all_covariance_data = [ ]
     all_molprobity_data = [ ]
     all_reflections_data = [ ]
-    all_tortoize_data = [ ]
+    all_rama_z_data = [ ]
     all_bfactor_data = []  # if externally supplied
     num_queued = 0
     results_queue = Queue()
@@ -256,7 +251,7 @@ def metrics_model_series_from_files(
         covariance_data = None
         molprobity_data = None
         reflections_data = None
-        tortoize_data = None
+        rama_z_data = None
         bfactor_data = None
 
         if json_data_path:
@@ -303,7 +298,7 @@ def metrics_model_series_from_files(
                 num_queued += 1
             else:
                 reflections_data = _get_reflections_data(model_path, reflections_path)
-        if calculate_tortoize:
+        if calculate_rama_z:
             if multiprocessing:
                 p = Process(target=_get_tortoize_data,
                             args=(model_path, seq_nums),
@@ -312,13 +307,13 @@ def metrics_model_series_from_files(
                 p.start()
                 num_queued += 1
             else:
-                tortoize_data = _get_tortoize_data(model_path)
+                rama_z_data = _get_tortoize_data(model_path, seq_nums)
 
         all_minimol_data.append(minimol)
         all_covariance_data.append(covariance_data)
         all_molprobity_data.append(molprobity_data)
         all_reflections_data.append(reflections_data)
-        all_tortoize_data.append(tortoize_data)
+        all_rama_z_data.append(rama_z_data)
         all_bfactor_data.append(bfactor_data)
 
     if multiprocessing:
@@ -330,8 +325,8 @@ def metrics_model_series_from_files(
                 all_molprobity_data[model_id] = result
             if result_type == 'reflections':
                 all_reflections_data[model_id] = result
-            if result_type == 'tortoize':
-                all_tortoize_data[model_id] = result
+            if result_type == 'rama_z':
+                all_rama_z_data[model_id] = result
     metrics_models = [ ]
     for model_id, model_data in enumerate(
         zip(
@@ -339,7 +334,7 @@ def metrics_model_series_from_files(
             all_covariance_data,
             all_molprobity_data,
             all_reflections_data,
-            all_tortoize_data,
+            all_rama_z_data,
             all_bfactor_data,
         )
     ):

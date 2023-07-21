@@ -73,7 +73,8 @@ class MetricsModelSeries:
         has_covariance = self.metrics_models[0].covariance_data is not None
         has_molprobity = self.metrics_models[0].molprobity_data is not None
         has_reflections = self.metrics_models[0].reflections_data is not None
-        has_tortoize = self.metrics_models[0].tortoize_data is not None
+        has_rama_z = self.metrics_models[0].rama_z_data is not None
+        has_rama_classification = not has_rama_z
 
         raw_data = [ ]
         for chain_id, chain_set in self.chain_sets.items():
@@ -84,7 +85,8 @@ class MetricsModelSeries:
                            'has_covariance'     : has_covariance,
                            'has_molprobity'     : has_molprobity,
                            'has_reflections'    : has_reflections,
-                           'has_tortoize'       : has_tortoize,
+                           'has_rama_z'         : has_rama_z,
+                           'has_rama_classification': has_rama_classification,
                            'aligned_length'     : aligned_length,
                            'residue_seqnos'     : [ ],
                            'residue_codes'      : [ ],
@@ -129,8 +131,7 @@ class MetricsModelSeries:
                                                  residue.mainchain_fit_score,
                                                  residue.sidechain_fit_score,
                                                  residue.covariance_score,
-                                                 residue.rama_z,
-                                                 residue.rota_z)
+                                                 residue.rama_z)
                     residue_percentile_values = (residue.avg_b_factor_percentile,
                                                  residue.max_b_factor_percentile,
                                                  residue.std_b_factor_percentile,
