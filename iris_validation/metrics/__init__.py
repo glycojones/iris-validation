@@ -262,8 +262,8 @@ def metrics_model_series_from_files(
                 if metric == "molprobity":
                     molprobity_data = json_data["molprobity"]
                 if metric == "tortoize":
-                    tortoize_data = json_data["tortoize"]
-                    calculate_tortoize = False
+                    rama_z_data = json_data["tortoize"]
+                    calculate_rama_z = False
                 if metric == "map_fit":
                     reflections_data = json_data["map_fit"]
                 if metric == "b_fact":

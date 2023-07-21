@@ -77,11 +77,14 @@ class MetricsChain:
             else:
                 if check_resnum:
                     try:
-                        residue_rama_z_score = rama_z_data[res_id]
+                        residue_rama_z_score = rama_z_data[res_id]["rama_z"]
                     except KeyError:
                         residue_rama_z_score = None
                 else:
-                    residue_rama_z_score = rama_z_data.get(seq_num, None)
+                    try:
+                        residue_rama_z_score = rama_z_data[seq_num]["rama_z"]
+                    except KeyError:
+                        residue_rama_z_score = None
             # ext b-factor
             if bfactor_data is None:
                 residue_bfact_score = None
