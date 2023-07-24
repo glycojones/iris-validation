@@ -334,6 +334,41 @@ class Panel:
         self.residue_view.attribs['viewBox'] = f'{width_buffer} {height_buffer} {viewbox_width} {viewbox_height}'
         self.dwg.add(self.residue_view)
         
+    def _add_metrics(self, metrics_to_display, metrics_source):
+        view = []
+        for metric_name in metrics_to_display:
+            for metric_info in metrics_source:
+                if metric_info["short_name"] == metric_name:
+                    view.append(metric_info)
+                    break
+        return view
+
+    def get_chain_view_rings(
+        self, 
+        continuous_metrics_to_display, 
+        discrete_metrics_to_display=None
+    ):
+        chain_view = []
+
+        # add discrete types first
+        if discrete_metrics_to_display:
+            chain_view.extend(
+                self._add_metrics(discrete_metrics_to_display, DISCRETE_METRICS)
+            )
+        else:
+            chain_view.extend(
+                self._add_metrics([m["short_name"] for m in CHAIN_VIEW_RINGS if m["type"] == "discrete"], DISCRETE_METRICS)
+            )
+
+        chain_view.extend(
+            self._add_metrics(continuous_metrics_to_display, CONTINUOUS_METRICS)
+        )
+
+        return chain_view
+
+    def get_residue_view_bars(self, residue_bars_to_display):
+        return self._add_metrics(residue_bars_to_display, CONTINUOUS_METRICS)
+
     def get_chain_view_rings(
         self, continuous_metrics_to_display, discrete_metrics_to_display=None
     ):
