@@ -368,34 +368,3 @@ class Panel:
 
     def get_residue_view_bars(self, residue_bars_to_display):
         return self._add_metrics(residue_bars_to_display, CONTINUOUS_METRICS)
-
-    def get_chain_view_rings(
-        self, continuous_metrics_to_display, discrete_metrics_to_display=None
-    ):
-        chain_view = []
-        # add discrete types first
-        if not discrete_metrics_to_display is None:
-            for metric_name in discrete_metrics_to_display:
-                for metric_info in DISCRETE_METRICS:
-                    if metric_info["short_name"] == metric_name:
-                        chain_view.append(metric_info)
-                        break
-        else:
-            for metric_info in CHAIN_VIEW_RINGS:
-                if metric_info["type"] == "discrete":
-                    chain_view.append(metric_info)
-        for metric_name in continuous_metrics_to_display:
-            for metric_info in CONTINUOUS_METRICS:
-                if metric_info["short_name"] == metric_name:
-                    chain_view.append(metric_info)
-                    break
-        return chain_view
-
-    def get_residue_view_bars(self, residue_bars_to_display):
-        residue_view = []
-        for metric_name in residue_bars_to_display:
-            for metric_info in CONTINUOUS_METRICS:
-                if metric_info["short_name"] == metric_name:
-                    residue_view.append(metric_info)
-                    break
-        return residue_view
