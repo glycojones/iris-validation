@@ -261,13 +261,15 @@ def metrics_model_series_from_files(
             for metric in json_data:
                 if metric == "molprobity":
                     molprobity_data = json_data["molprobity"]
+                    run_molprobity = False
                 if metric == "tortoize":
                     rama_z_data = json_data["tortoize"]
                     calculate_rama_z = False
                 if metric == "map_fit":
                     reflections_data = json_data["map_fit"]
-                if metric == "b_fact":
-                    bfactor_data = json_data["b_fact"]
+                    reflections_path = None
+                if metric == "b_factor":
+                    bfactor_data = json_data["b_factor"]
         if run_covariance:
             if multiprocessing:
                 p = Process(target=_get_covariance_data,

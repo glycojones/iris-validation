@@ -58,7 +58,7 @@ class MetricsChain:
             # ext b-factor
             residue_bfact_score = get_data_from_dict(bfactor_data,
                 id=res_id,seq_num=seq_num,check_resnum=check_resnum,
-                with_percentiles=data_with_percentiles,percentile_key="b-factor",
+                with_percentiles=data_with_percentiles,percentile_key="b_factor",
                 dict_ext_percentiles=dict_ext_percentiles)
             residue = MetricsResidue(
                 mmol_residue,
