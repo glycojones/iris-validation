@@ -15,7 +15,7 @@ def generate_report(
     previous_distpred_path=None,
     run_covariance=False,
     run_molprobity=False,
-    calculate_rama_z=False,
+    calculate_rama_z=True,
     multiprocessing=True,
     latest_model_metrics_json=None,
     previous_model_metrics_json=None,
