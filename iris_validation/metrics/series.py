@@ -1,11 +1,11 @@
-import clipper
 
 from iris_validation import utils
-from iris_validation.metrics.model import MetricsModel
-from iris_validation.metrics.reflections import ReflectionsHandler
+
+# from iris_validation.metrics.model import MetricsModel
+# from iris_validation.metrics.reflections import ReflectionsHandler
 
 
-class MetricsModelSeries():
+class MetricsModelSeries:
     def __init__(self, metrics_models):
         self.metrics_models = metrics_models
         self.chain_sets = None

@@ -6,3 +6,4 @@ const boxColors = {box_colors};
 const boxLabels = {box_labels};
 const gapDegrees = {gap_degrees};
 const chainSelectorColors = {chain_selector_colors};
+const bar_y_lim = {bar_y_lim};

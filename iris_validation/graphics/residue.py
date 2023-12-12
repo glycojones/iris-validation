@@ -4,19 +4,34 @@ from svgwrite.gradients import LinearGradient
 from iris_validation._defs import COLORS, RESIDUE_VIEW_BOXES, RESIDUE_VIEW_BARS
 
 
-class ResidueView():
-    def __init__(self, canvas_size=(400, 1000)):
+class ResidueView:
+    def __init__(
+        self,
+        canvas_size=(400, 1000),
+        ResidueViewBars_inp=None,
+        percentile_bar_label=None,
+        percentile_bar_range=None,
+    ):
         self.canvas_size = canvas_size
 
         self.dwg = None
         self.svg_id = 'iris-residue-view'
-
+        self.residue_view_bars = RESIDUE_VIEW_BARS
+        if ResidueViewBars_inp:
+            self.residue_view_bars = ResidueViewBars_inp
         self.box_names = [ metric['short_name'] for metric in RESIDUE_VIEW_BOXES ]
-        self.bar_names = [ metric['long_name'] for metric in RESIDUE_VIEW_BARS ]
+        self.bar_names = [ metric['long_name'] for metric in self.residue_view_bars ]
 
         # TODO: allow any number of bars
         self.bar_names = self.bar_names[:2]
 
+        self.percentile_bar_label = "Percentiles"
+        if percentile_bar_label:
+            self.percentile_bar_label = percentile_bar_label
+        if percentile_bar_range:
+            self.percentile_bar_range = percentile_bar_range
+        else:
+            self.percentile_bar_range = [0, 100]
         self._draw()
 
     def _draw(self):
@@ -104,29 +119,41 @@ class ResidueView():
                                       id=f'{self.svg_id}-bar-charts-container'))
 
         # Bar chart axis
+        label_step = (
+            self.percentile_bar_range[1] - self.percentile_bar_range[0]
+        ) / 10.0
         for label_id in range(10+1):
             height = bar_charts_bounds[1] + label_id*(bar_charts_bounds[3]-bar_charts_bounds[1])/10
             self.dwg.add(self.dwg.line((bar_charts_bounds[0]-5, height), (bar_charts_bounds[0]+5, height),
                                        stroke=COLORS['BLACK'],
                                        stroke_width=2,
                                        stroke_opacity=1))
-            self.dwg.add(self.dwg.text(str(100-label_id*10),
-                                       insert=(bar_charts_bounds[0]-8, height+5),
-                                       font_size=18,
-                                       font_family='Arial',
-                                       fill=COLORS['BLACK'],
-                                       fill_opacity=1,
-                                       text_anchor='end',
-                                       alignment_baseline='central'))
+
+            self.dwg.add(
+                self.dwg.text(
+                    str(round(self.percentile_bar_range[1] - label_id * label_step, 1)),
+                    insert=(bar_charts_bounds[0] - 8, height + 5),
+                    font_size=18,
+                    font_family="Arial",
+                    fill=COLORS["BLACK"],
+                    fill_opacity=1,
+                    text_anchor="end",
+                    alignment_baseline="central",
+                )
+            )
         # Bar chart bottom label
-        self.dwg.add(self.dwg.text('Percentiles',
-                                   insert=(self.canvas_size[0]/2, bar_charts_bounds[3]+50),
-                                   font_size=18,
-                                   font_family='Arial',
-                                   fill=COLORS['BLACK'],
-                                   fill_opacity=1,
-                                   text_anchor='middle',
-                                   alignment_baseline='central'))
+        self.dwg.add(
+            self.dwg.text(
+                self.percentile_bar_label,
+                insert=(self.canvas_size[0] / 2, bar_charts_bounds[3] + 50),
+                font_size=18,
+                font_family="Arial",
+                fill=COLORS["BLACK"],
+                fill_opacity=1,
+                text_anchor="middle",
+                alignment_baseline="central",
+            )
+        )
 
         bar_chart_width = bar_charts_bounds[2] - bar_charts_bounds[0]
         for bar_id, bar_name in enumerate(self.bar_names):

@@ -6,7 +6,7 @@ from scipy.stats import norm
 from iris_validation import utils
 
 
-class ReflectionsHandler():
+class ReflectionsHandler:
     def __init__(self, f_reflections=None, xmap=None, minimol=None):
         self.f_reflections = f_reflections
         self.xmap = xmap

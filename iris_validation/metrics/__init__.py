@@ -4,9 +4,9 @@ import subprocess
 import json
 import clipper
 
-from iris_validation.utils import ONE_LETTER_CODES
-from iris_validation.metrics.residue import MetricsResidue
-from iris_validation.metrics.chain import MetricsChain
+# from iris_validation.utils import ONE_LETTER_CODES
+# from iris_validation.metrics.residue import MetricsResidue
+# from iris_validation.metrics.chain import MetricsChain
 from iris_validation.metrics.model import MetricsModel
 from iris_validation.metrics.series import MetricsModelSeries
 from iris_validation.metrics.reflections import ReflectionsHandler
@@ -197,24 +197,29 @@ def _get_tortoize_data(model_path, seq_nums, model_id=None, out_queue=None):
 
     return rama_z_data
 
-def metrics_model_series_from_files(model_paths,
-                                    reflections_paths=None,
-                                    sequence_paths=None,
-                                    distpred_paths=None,
-                                    run_covariance=False,
-                                    run_molprobity=False,
-                                    calculate_rama_z=True,
-                                    multiprocessing=True):
+
+def metrics_model_series_from_files(
+    model_paths,
+    reflections_paths=None,
+    sequence_paths=None,
+    distpred_paths=None,
+    run_covariance=False,
+    run_molprobity=False,
+    calculate_rama_z=False,
+    model_json_paths=None,
+    data_with_percentiles=None,
+    multiprocessing=True,
+):
     try:
         if isinstance(model_paths, str):
             model_paths = [ model_paths ]
         model_paths = tuple(model_paths)
-        if None in model_paths:
+        if model_paths[-1] is None:
             raise TypeError
     except TypeError as exception:
         raise ValueError('Argument \'model_paths\' should be an iterable of filenames') from exception
 
-    path_lists = [ model_paths, reflections_paths, sequence_paths, distpred_paths ]
+    path_lists = [ model_paths, reflections_paths, sequence_paths, distpred_paths, model_json_paths ]
     for i in range(1, len(path_lists)):
         if path_lists[i] is None:
             path_lists[i] = tuple([ None for _ in model_paths ])
@@ -227,16 +232,44 @@ def metrics_model_series_from_files(model_paths,
     all_molprobity_data = [ ]
     all_reflections_data = [ ]
     all_rama_z_data = [ ]
+    all_bfactor_data = []  # if externally supplied
     num_queued = 0
     results_queue = Queue()
+    check_resnum = False
     for model_id, file_paths in enumerate(zip(*path_lists)):
-        model_path, reflections_path, sequence_path, distpred_path = file_paths
+        (
+            model_path,
+            reflections_path,
+            sequence_path,
+            distpred_path,
+            json_data_path,
+        ) = file_paths
+        if model_path is None:
+            continue
         minimol = _get_minimol_from_path(model_path)
         seq_nums = _get_minimol_seq_nums(minimol)
         covariance_data = None
         molprobity_data = None
         reflections_data = None
         rama_z_data = None
+        bfactor_data = None
+
+        if json_data_path:
+            check_resnum = True
+            with open(json_data_path, "r") as j:
+                json_data = json.load(j)
+            for metric in json_data:
+                if metric == "molprobity":
+                    molprobity_data = json_data["molprobity"]
+                    run_molprobity = False
+                if metric == "rama_z":
+                    rama_z_data = json_data["rama_z"]
+                    calculate_rama_z = False
+                if metric == "map_fit":
+                    reflections_data = json_data["map_fit"]
+                    reflections_path = None
+                if metric == "b_factor":
+                    bfactor_data = json_data["b_factor"]
         if run_covariance:
             if multiprocessing:
                 p = Process(target=_get_covariance_data,
@@ -283,6 +316,7 @@ def metrics_model_series_from_files(model_paths,
         all_molprobity_data.append(molprobity_data)
         all_reflections_data.append(reflections_data)
         all_rama_z_data.append(rama_z_data)
+        all_bfactor_data.append(bfactor_data)
 
     if multiprocessing:
         for _ in range(num_queued):
@@ -295,10 +329,18 @@ def metrics_model_series_from_files(model_paths,
                 all_reflections_data[model_id] = result
             if result_type == 'rama_z':
                 all_rama_z_data[model_id] = result
-
     metrics_models = [ ]
-    for model_id, model_data in enumerate(zip(all_minimol_data, all_covariance_data, all_molprobity_data, all_reflections_data, all_rama_z_data)):
-        metrics_model = MetricsModel(*model_data)
+    for model_id, model_data in enumerate(
+        zip(
+            all_minimol_data,
+            all_covariance_data,
+            all_molprobity_data,
+            all_reflections_data,
+            all_rama_z_data,
+            all_bfactor_data,
+        )
+    ):
+        metrics_model = MetricsModel(*model_data, check_resnum, data_with_percentiles)
         metrics_models.append(metrics_model)
 
     metrics_model_series = MetricsModelSeries(metrics_models)

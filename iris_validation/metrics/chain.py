@@ -1,8 +1,19 @@
 from iris_validation.metrics.residue import MetricsResidue
 
 
-class MetricsChain():
-    def __init__(self, mmol_chain, parent_model=None, covariance_data=None, molprobity_data=None, density_scores=None, rama_z_data=None):
+class MetricsChain:
+    def __init__(
+        self,
+        mmol_chain,
+        parent_model=None,
+        covariance_data=None,
+        molprobity_data=None,
+        density_scores=None,
+        rama_z_data=None,
+        bfactor_data=None,
+        check_resnum=False,
+        data_with_percentiles=None,
+    ):
         self.minimol_chain = mmol_chain
         self.parent_model = parent_model
         self.covariance_data = covariance_data
@@ -14,15 +25,41 @@ class MetricsChain():
         self.residues = [ ]
         self.length = len(mmol_chain)
         self.chain_id = str(mmol_chain.id().trim())
-
+        dict_ext_percentiles = {}  # stores the percentiles supplied externally
         for residue_index, mmol_residue in enumerate(mmol_chain):
             previous_residue = mmol_chain[residue_index-1] if residue_index > 0 else None
             next_residue = mmol_chain[residue_index+1] if residue_index < len(mmol_chain)-1 else None
             seq_num = int(mmol_residue.seqnum())
-            residue_covariance_data = None if covariance_data is None else covariance_data[seq_num]
-            residue_molprobity_data = None if molprobity_data is None else molprobity_data[seq_num]
-            residue_density_scores = None if density_scores is None else density_scores[seq_num]
-            residue_rama_z_score = None if rama_z_data is None else rama_z_data.get(seq_num, None)
+            res_id = str(mmol_residue.id()).strip()
+            # covariance
+            residue_covariance_data = get_data_from_dict(covariance_data,
+                id=res_id,seq_num=seq_num,check_resnum=check_resnum)
+            # molprobity
+            residue_molprobity_data = get_data_from_dict(molprobity_data,
+                id=res_id,seq_num=seq_num,check_resnum=check_resnum)
+            # density scores
+            residue_density_scores = get_data_from_dict(density_scores,
+                id=res_id,seq_num=seq_num,check_resnum=check_resnum,
+                with_percentiles=data_with_percentiles,percentile_key="map_fit",
+                dict_ext_percentiles=dict_ext_percentiles)
+            # rama_z
+            if rama_z_data is None:
+                residue_rama_z_score = None
+            elif check_resnum:
+                try:
+                    residue_rama_z_score = rama_z_data[res_id]
+                except KeyError:
+                    residue_rama_z_score = None
+            else:
+                try:
+                    residue_rama_z_score = rama_z_data[seq_num]
+                except KeyError:
+                    residue_rama_z_score = None
+            # ext b-factor
+            residue_bfact_score = get_data_from_dict(bfactor_data,
+                id=res_id,seq_num=seq_num,check_resnum=check_resnum,
+                with_percentiles=data_with_percentiles,percentile_key="b_factor",
+                dict_ext_percentiles=dict_ext_percentiles)
             residue = MetricsResidue(
                 mmol_residue,
                 residue_index,
@@ -32,7 +69,10 @@ class MetricsChain():
                 residue_covariance_data,
                 residue_molprobity_data,
                 residue_density_scores,
-                residue_rama_z_score)
+                residue_rama_z_score,
+                residue_bfact_score,
+                dict_ext_percentiles,
+            )
             self.residues.append(residue)
 
         for residue_index, residue in enumerate(self.residues):
@@ -86,3 +126,18 @@ class MetricsChain():
                 else:
                     ion_bfs.append(residue.avg_b_factor)
         return all_bfs, aa_bfs, mc_bfs, sc_bfs, non_aa_bfs, water_bfs, ligand_bfs, ion_bfs
+
+def get_data_from_dict(data_dict, id, seq_num, check_resnum, with_percentiles=None, percentile_key=None, dict_ext_percentiles=None):
+    if data_dict is None:
+        return None
+    if not check_resnum:
+        return data_dict.get(seq_num, None)
+    
+    try:
+        if with_percentiles and percentile_key in with_percentiles:
+            dict_ext_percentiles[percentile_key] = data_dict[id][-1]
+            return data_dict[id][0]
+        else:
+            return data_dict[id]
+    except KeyError:
+        return None

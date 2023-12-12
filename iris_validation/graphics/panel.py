@@ -7,7 +7,15 @@ from svgwrite.animate import Animate
 
 from iris_validation.graphics.chain import ChainView
 from iris_validation.graphics.residue import ResidueView
-from iris_validation._defs import COLORS, CHAIN_VIEW_RINGS, RESIDUE_VIEW_BOXES, RESIDUE_VIEW_BARS, CHAIN_VIEW_GAP_ANGLE
+from iris_validation._defs import (
+    COLORS,
+    CHAIN_VIEW_RINGS,
+    RESIDUE_VIEW_BOXES,
+    RESIDUE_VIEW_BARS,
+    CHAIN_VIEW_GAP_ANGLE,
+    DISCRETE_METRICS,
+    CONTINUOUS_METRICS,
+)
 
 
 JS_PATH = os.path.join(os.path.dirname(__file__), 'js')
@@ -15,11 +23,36 @@ JS_CONSTANTS_PATH = os.path.join(JS_PATH, 'constants.js')
 JS_INTERACTION_PATH = os.path.join(JS_PATH, 'interaction.js')
 
 
-class Panel():
-    def __init__(self, data, canvas_size=(1500, 1000)):
+class Panel:
+    def __init__(
+        self,
+        data,
+        canvas_size=(1500, 1000),
+        continuous_metrics_to_display=None,
+        discrete_metrics_to_display=None,
+        residue_bars_to_display=None,
+        percentile_bar_label=None,
+        percentile_bar_range=None,
+    ):
         self.data = data
         self.canvas_size = canvas_size
-
+        self.chain_view_rings = CHAIN_VIEW_RINGS
+        if continuous_metrics_to_display:
+            self.chain_view_rings = self.get_chain_view_rings(
+                continuous_metrics_to_display,
+                discrete_metrics_to_display=discrete_metrics_to_display,
+            )
+        self.residue_view_bars = RESIDUE_VIEW_BARS
+        if residue_bars_to_display is not None:
+            self.residue_view_bars = self.get_residue_view_bars(residue_bars_to_display)
+        if percentile_bar_label:
+            self.percentile_bar_label = percentile_bar_label
+        else:
+            self.percentile_bar_label = None
+        if percentile_bar_range:
+            self.percentile_bar_range = percentile_bar_range
+        else:
+            self.percentile_bar_range = [0, 100]
         self.dwg = None
         self.javascript = None
         self.chain_views = None
@@ -36,8 +69,12 @@ class Panel():
 
     # TODO: Make this nicer
     def _verify_chosen_metrics(self):
-        global CHAIN_VIEW_RINGS, RESIDUE_VIEW_BOXES, RESIDUE_VIEW_BARS
-        for metric_list in (CHAIN_VIEW_RINGS, RESIDUE_VIEW_BOXES, RESIDUE_VIEW_BARS):
+        global RESIDUE_VIEW_BOXES
+        for metric_list in (
+            self.chain_view_rings,
+            RESIDUE_VIEW_BOXES,
+            self.residue_view_bars,
+        ):
             if not isinstance(metric_list, list):
                 raise ValueError('Chosen metrics in the _defs.py file must be lists')
             for metric_index in reversed(range(len(metric_list))):
@@ -55,7 +92,7 @@ class Panel():
     def _generate_javascript(self):
         json_data = json.dumps(self.data)
         num_chains = len(self.chain_ids)
-        bar_metric_ids = [ metric['id'] for metric in RESIDUE_VIEW_BARS ]
+        bar_metric_ids = [metric["id"] for metric in self.residue_view_bars]
         box_metric_ids = [ metric['id'] for metric in RESIDUE_VIEW_BOXES ]
         box_colors = json.dumps([ metric['seq_colors'] for metric in RESIDUE_VIEW_BOXES ])
         box_labels = json.dumps([ metric['seq_labels'] for metric in RESIDUE_VIEW_BOXES ])
@@ -67,23 +104,35 @@ class Panel():
         with open(JS_INTERACTION_PATH, 'r', encoding='utf8') as infile:
             js_interation = infile.read()
 
-        js_constants = js_constants.format(model_data=json_data,
-                                           num_chains=num_chains,
-                                           bar_metric_ids=bar_metric_ids,
-                                           box_metric_ids=box_metric_ids,
-                                           box_colors=box_colors,
-                                           box_labels=box_labels,
-                                           gap_degrees=gap_degrees,
-                                           chain_selector_colors=self.swtich_colors)
+        js_constants = js_constants.format(
+            model_data=json_data,
+            num_chains=num_chains,
+            bar_metric_ids=bar_metric_ids,
+            box_metric_ids=box_metric_ids,
+            box_colors=box_colors,
+            box_labels=box_labels,
+            gap_degrees=gap_degrees,
+            chain_selector_colors=self.swtich_colors,
+            bar_y_lim=self.percentile_bar_range,
+        )
 
         self.javascript = js_constants + js_interation
 
     def _generate_subviews(self):
         self.chain_views = [ ]
         for chain_index, chain_data in enumerate(self.data):
-            chain_view = ChainView(chain_data, chain_index, hidden=chain_index>0).dwg
+            chain_view = ChainView(
+                chain_data,
+                chain_index,
+                hidden=chain_index > 0,
+                ChainViewRings_inp=self.chain_view_rings,
+            ).dwg
             self.chain_views.append(chain_view)
-        self.residue_view = ResidueView().dwg
+        self.residue_view = ResidueView(
+            ResidueViewBars_inp=self.residue_view_bars,
+            percentile_bar_label=self.percentile_bar_label,
+            percentile_bar_range=self.percentile_bar_range,
+        ).dwg
 
     def _draw(self):
         middle_gap = 30
@@ -284,3 +333,38 @@ class Panel():
         self.residue_view.attribs['x'] = str(view_adj_x)
         self.residue_view.attribs['viewBox'] = f'{width_buffer} {height_buffer} {viewbox_width} {viewbox_height}'
         self.dwg.add(self.residue_view)
+        
+    def _add_metrics(self, metrics_to_display, metrics_source):
+        view = []
+        for metric_name in metrics_to_display:
+            for metric_info in metrics_source:
+                if metric_info["short_name"] == metric_name:
+                    view.append(metric_info)
+                    break
+        return view
+
+    def get_chain_view_rings(
+        self, 
+        continuous_metrics_to_display, 
+        discrete_metrics_to_display=None
+    ):
+        chain_view = []
+
+        # add discrete types first
+        if discrete_metrics_to_display:
+            chain_view.extend(
+                self._add_metrics(discrete_metrics_to_display, DISCRETE_METRICS)
+            )
+        else:
+            chain_view.extend(
+                self._add_metrics([m["short_name"] for m in CHAIN_VIEW_RINGS if m["type"] == "discrete"], DISCRETE_METRICS)
+            )
+
+        chain_view.extend(
+            self._add_metrics(continuous_metrics_to_display, CONTINUOUS_METRICS)
+        )
+
+        return chain_view
+
+    def get_residue_view_bars(self, residue_bars_to_display):
+        return self._add_metrics(residue_bars_to_display, CONTINUOUS_METRICS)

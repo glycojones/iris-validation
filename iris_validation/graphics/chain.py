@@ -7,16 +7,26 @@ from svgwrite.animate import Animate
 from iris_validation._defs import COLORS, CHAIN_VIEW_RINGS, CHAIN_VIEW_GAP_ANGLE
 
 
-class ChainView():
-    def __init__(self, data, chain_index, canvas_size=(1000, 1000), hidden=False):
+class ChainView:
+    def __init__(
+        self,
+        data,
+        chain_index,
+        canvas_size=(1000, 1000),
+        hidden=False,
+        ChainViewRings_inp=None,
+    ):
         self.data = data
+        self.chain_view_rings = CHAIN_VIEW_RINGS
+        if ChainViewRings_inp:
+            self.chain_view_rings = ChainViewRings_inp
         self.chain_index = chain_index
         self.canvas_size = canvas_size
         self.hidden = hidden
 
         self.dwg = None
         self.cfa_cache = { }
-        self.num_rings = len(CHAIN_VIEW_RINGS)
+        self.num_rings = len(self.chain_view_rings)
         self.num_versions = self.data['num_versions']
         self.num_segments = self.data['aligned_length']
         self.center = (self.canvas_size[0] // 2, self.canvas_size[1] // 2)
@@ -58,7 +68,7 @@ class ChainView():
 
 
         # Draw data rings
-        for ring_id, ring_metric in enumerate(CHAIN_VIEW_RINGS):
+        for ring_id, ring_metric in enumerate(self.chain_view_rings):
             self._add_ring(ring_id, ring_metric)
 
         # Draw missing-data shade
