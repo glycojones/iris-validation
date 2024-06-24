@@ -1,4 +1,4 @@
-let selectedVersion = 1;
+let selectedVersion = numVersions - 1;
 let selectedChain = 0;
 let selectedResidue = 0;
 

@@ -1,0 +1,37 @@
+[tool.pdm]
+
+[project]
+name = "iris-validation"
+version = "0.3.0"
+description = "A package for interactive all-in-one graphical validation of 3D protein model iterations"
+readme = "README.md"
+authors = [
+    { name = "William Rochira", email = "william.rochira@hotmail.co.uk" },
+    { name = "Jon Agirre", email = "jon.agirre@york.ac.uk" }
+]
+maintainers = [
+    { name = "Jon Agirre", email = "jon.agirre@york.ac.uk" },
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.7",
+]
+requires-python = ">=3"
+dependencies = [
+    "svgwrite",
+    "g",
+    "i",
+    "r",
+    "s",
+    "t",
+    "v",
+    "w",
+]
+
+[project.urls]
+Homepage = "https://github.com/glycojones/iris-validation"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"

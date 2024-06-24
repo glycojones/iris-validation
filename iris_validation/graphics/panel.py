@@ -91,6 +91,7 @@ class Panel:
 
     def _generate_javascript(self):
         json_data = json.dumps(self.data)
+        num_versions = self.num_models
         num_chains = len(self.chain_ids)
         bar_metric_ids = [metric["id"] for metric in self.residue_view_bars]
         box_metric_ids = [ metric['id'] for metric in RESIDUE_VIEW_BOXES ]
@@ -106,6 +107,7 @@ class Panel:
 
         js_constants = js_constants.format(
             model_data=json_data,
+            num_versions=num_versions,
             num_chains=num_chains,
             bar_metric_ids=bar_metric_ids,
             box_metric_ids=box_metric_ids,

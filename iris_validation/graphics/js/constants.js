@@ -1,4 +1,5 @@
 const modelData = {model_data};
+const numVersions = {num_versions};
 const numChains = {num_chains};
 const boxMetricIDs = {box_metric_ids};
 const barMetricIDs = {bar_metric_ids};

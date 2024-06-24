@@ -8,25 +8,19 @@ from iris_validation import generate_report
 INPUT_DIR = './test_data/'
 OUTPUT_DIR = './test_output/'
 
-PDB_ID = '2a0x'
+PDB_ID = '3atp'
 ROOT_PATH = str(os.path.join(INPUT_DIR, PDB_ID)) + '{suffix}'
 
 
 if __name__ == '__main__':
+    cwd = os.getcwd()
+    print (cwd)
     t0 = time.time()
 
     generate_report(latest_model_path=ROOT_PATH.format(suffix='_final.pdb'),
                     latest_reflections_path=ROOT_PATH.format(suffix='_final.mtz'),
-                    latest_sequence_path=ROOT_PATH.format(suffix='.fasta'),
-                    latest_distpred_path=ROOT_PATH.format(suffix='.npz'),
                     previous_model_path=ROOT_PATH.format(suffix='_0cyc.pdb'),
                     previous_reflections_path=ROOT_PATH.format(suffix='_0cyc.mtz'),
-                    previous_sequence_path=ROOT_PATH.format(suffix='.fasta'),
-                    previous_distpred_path=ROOT_PATH.format(suffix='.npz'),
-                    run_covariance=False,
-                    run_molprobity=False,
-                    calculate_rama_z=True,
-                    multiprocessing=True,
                     output_dir=OUTPUT_DIR)
     assert path.exists(OUTPUT_DIR)
 
