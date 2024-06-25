@@ -15,7 +15,7 @@ def test_generate_vanilla_report ():
     t0 = time.time()
 
     from importlib.metadata import version
-    print("Testing Iris version " + version("iris_validation"))
+    print("\nTesting Iris version " + version("iris_validation"))
           
     generate_report(latest_model_path=ROOT_PATH.format(suffix='_final.pdb'),
                     latest_reflections_path=ROOT_PATH.format(suffix='_final.mtz'),
