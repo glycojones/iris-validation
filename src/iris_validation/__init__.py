@@ -27,6 +27,7 @@ def generate_report(
     percentile_bar_range=None,
     wrap_in_html=True,
     output_dir=None,
+    output_name_prefix="report"
 ):
 
     model_paths = (previous_model_path, latest_model_path)
@@ -34,6 +35,9 @@ def generate_report(
     sequence_paths = (previous_sequence_path, latest_sequence_path)
     distpred_paths = (previous_distpred_path, latest_distpred_path)
     model_json_paths = (previous_model_metrics_json, latest_model_metrics_json)
+
+    # sanitise output file name
+    output_name_prefix = output_name_prefix.replace('/','_').replace('.','_')
 
     model_series = metrics_model_series_from_files(
         model_paths,
@@ -68,5 +72,5 @@ def generate_report(
         os.mkdir(output_dir)
 
     extension = 'html' if wrap_in_html else 'svg'
-    with open(os.path.join(output_dir, f'report.{extension}'), 'w', encoding='utf8') as outfile:
+    with open(os.path.join(output_dir, f"{output_name_prefix}.{extension}"), 'w', encoding='utf8') as outfile:
         outfile.write(panel_string)
