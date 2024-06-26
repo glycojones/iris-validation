@@ -25,8 +25,7 @@ def test_generate_vanilla_report ():
                     run_covariance=False,
                     run_molprobity=False,
                     calculate_rama_z=False,
-                    multiprocessing=True
-    )
+                    multiprocessing=True)
     assert path.exists(OUTPUT_DIR.format(suffix="/report.html"))
 
     t1 = time.time()
@@ -38,14 +37,17 @@ def test_generate_rama_z_report ():
 
     generate_report(latest_model_path=ROOT_PATH.format(suffix='_final.pdb'),
                     latest_reflections_path=ROOT_PATH.format(suffix='_final.mtz'),
+                    latest_sequence_path=ROOT_PATH.format(suffix='.fasta'),
+                    latest_distpred_path=ROOT_PATH.format(suffix='.npz'),
                     previous_model_path=ROOT_PATH.format(suffix='_0cyc.pdb'),
                     previous_reflections_path=ROOT_PATH.format(suffix='_0cyc.mtz'),
-                    output_dir=OUTPUT_DIR,
+                    previous_sequence_path=ROOT_PATH.format(suffix='.fasta'),
+                    previous_distpred_path=ROOT_PATH.format(suffix='.npz'),
                     run_covariance=False,
                     run_molprobity=False,
                     calculate_rama_z=True,
-                    multiprocessing=True
-    )
+                    multiprocessing=True,
+                    output_dir=OUTPUT_DIR)
     assert path.exists(OUTPUT_DIR.format(suffix="/report.html"))
 
     t1 = time.time()

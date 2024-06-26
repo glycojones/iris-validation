@@ -210,6 +210,22 @@ def metrics_model_series_from_files(
     data_with_percentiles=None,
     multiprocessing=True,
 ):
+    try:
+        if isinstance(model_paths, str):
+            model_paths = [ model_paths ]
+        model_paths = tuple(model_paths)
+        if model_paths[-1] is None:
+            raise TypeError
+    except TypeError as exception:
+        raise ValueError('Argument \'model_paths\' should be an iterable of filenames') from exception
+
+    path_lists = [ model_paths, reflections_paths, sequence_paths, distpred_paths, model_json_paths ]
+    for i in range(1, len(path_lists)):
+        if path_lists[i] is None:
+            path_lists[i] = tuple([ None for _ in model_paths ])
+        if len(path_lists[i]) != len(model_paths) or \
+           path_lists[i].count(None) not in (0, len(path_lists[i])):
+            raise ValueError('Path arguments should be equal-length iterables of filenames')
 
     all_minimol_data = [ ]
     all_covariance_data = [ ]
@@ -219,7 +235,6 @@ def metrics_model_series_from_files(
     all_bfactor_data = []  # if externally supplied
     num_queued = 0
     results_queue = Queue()
-    path_lists = [ model_paths, reflections_paths, sequence_paths, distpred_paths ]
     check_resnum = False
     for model_id, file_paths in enumerate(zip(*path_lists)):
         (
@@ -264,7 +279,7 @@ def metrics_model_series_from_files(
                 p.start()
                 num_queued += 1
             else:
-                covariance_data = _get_covariance_data(model_path, sequence_path, distpred_path, seq_nums)
+                covariance_data = _get_covariance_data(model_path, sequence_path, distpred_path)
         if run_molprobity:
             if multiprocessing:
                 p = Process(target=_get_molprobity_data,
