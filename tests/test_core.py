@@ -28,6 +28,26 @@ def test_generate_vanilla_report ():
                     output_name_prefix="vanilla_report")
     assert path.exists(OUTPUT_DIR.format(suffix="/report.html"))
 
+def test_generate_one_model_report ():
+    t0 = time.time()
+
+    from importlib.metadata import version
+    print("\nTesting Iris version " + version("iris_validation"))
+          
+    generate_report(latest_model_path=ROOT_PATH.format(suffix='_final.pdb'),
+                    latest_reflections_path=ROOT_PATH.format(suffix='_final.mtz'),
+                    output_dir=OUTPUT_DIR,
+                    run_covariance=False,
+                    run_molprobity=False,
+                    calculate_rama_z=False,
+                    multiprocessing=True,
+                    output_name_prefix="one_model_report")
+    assert path.exists(OUTPUT_DIR.format(suffix="/report.html"))
+
+    t1 = time.time()
+    print('Time taken:', round(t1-t0, 2), 's')
+    print()
+
     t1 = time.time()
     print('Time taken:', round(t1-t0, 2), 's')
     print()
