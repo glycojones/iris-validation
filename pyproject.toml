@@ -34,3 +34,8 @@ version_file = "src/iris_validation/_version.py"
 Homepage = "https://github.com/glycojones/iris-validation"
 Issues = "https://github.com/glycojones/iris-validation/issues"
 
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "problem",
+]

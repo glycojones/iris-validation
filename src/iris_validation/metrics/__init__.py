@@ -198,17 +198,16 @@ def _get_tortoize_data(model_path, seq_nums, model_id=None, out_queue=None):
     return rama_z_data
 
 
-def metrics_model_series_from_files(
-    model_paths,
-    reflections_paths=None,
-    sequence_paths=None,
-    distpred_paths=None,
-    run_covariance=False,
-    run_molprobity=False,
-    calculate_rama_z=False,
-    model_json_paths=None,
-    data_with_percentiles=None,
-    multiprocessing=True,
+def metrics_model_series_from_files(model_paths,
+                                    reflections_paths=None,
+                                    sequence_paths=None,
+                                    distpred_paths=None,
+                                    model_json_paths=None,
+                                    run_covariance=False,
+                                    run_molprobity=False,
+                                    calculate_rama_z=False,
+                                    data_with_percentiles=None,
+                                    multiprocessing=True,
 ):
     try:
         if isinstance(model_paths, str):
@@ -220,12 +219,12 @@ def metrics_model_series_from_files(
         raise ValueError('Argument \'model_paths\' should be an iterable of filenames') from exception
 
     path_lists = [ model_paths, reflections_paths, sequence_paths, distpred_paths, model_json_paths ]
-    for i in range(1, len(path_lists)):
-        if path_lists[i] is None:
-            path_lists[i] = tuple([ None for _ in model_paths ])
-        if len(path_lists[i]) != len(model_paths) or \
-           path_lists[i].count(None) not in (0, len(path_lists[i])):
-            raise ValueError('Path arguments should be equal-length iterables of filenames')
+    # for i in range(1, len(path_lists)):
+    #     if path_lists[i] is None:
+    #         path_lists[i] = tuple([ None for _ in model_paths ])
+    #     if len(path_lists[i]) != len(model_paths) or \
+    #        path_lists[i].count(None) not in (0, len(path_lists[i])):
+    #         raise ValueError('Path arguments should be equal-length iterables of filenames')
 
     all_minimol_data = [ ]
     all_covariance_data = [ ]
@@ -254,6 +253,7 @@ def metrics_model_series_from_files(
         rama_z_data = None
         bfactor_data = None
 
+        # load external metric data from the provided json file path
         if json_data_path:
             check_resnum = True
             with open(json_data_path, "r") as j:
@@ -278,6 +278,7 @@ def metrics_model_series_from_files(
                                      'out_queue': results_queue })
                 p.start()
                 num_queued += 1
+                print ("Adding covariance data")
             else:
                 covariance_data = _get_covariance_data(model_path, sequence_path, distpred_path)
         if run_molprobity:
@@ -288,6 +289,7 @@ def metrics_model_series_from_files(
                                      'out_queue': results_queue })
                 p.start()
                 num_queued += 1
+                print ("Adding molprobity data")
             else:
                 molprobity_data = _get_molprobity_data(model_path, seq_nums)
         if reflections_path is not None:
@@ -298,6 +300,7 @@ def metrics_model_series_from_files(
                                      'out_queue': results_queue })
                 p.start()
                 num_queued += 1
+                print ("Adding reflection data")
             else:
                 reflections_data = _get_reflections_data(model_path, reflections_path)
         if calculate_rama_z:
@@ -308,9 +311,11 @@ def metrics_model_series_from_files(
                                      'out_queue': results_queue })
                 p.start()
                 num_queued += 1
+                print ("Adding tortoize data")
             else:
                 rama_z_data = _get_tortoize_data(model_path, seq_nums)
 
+        print (num_queued)
         all_minimol_data.append(minimol)
         all_covariance_data.append(covariance_data)
         all_molprobity_data.append(molprobity_data)
@@ -323,12 +328,13 @@ def metrics_model_series_from_files(
             result_type, model_id, result = results_queue.get()
             if result_type == 'covariance':
                 all_covariance_data[model_id] = result
-            if result_type == 'molprobity':
-                all_molprobity_data[model_id] = result
-            if result_type == 'reflections':
-                all_reflections_data[model_id] = result
             if result_type == 'rama_z':
                 all_rama_z_data[model_id] = result
+            if result_type == 'molprobity':
+                all_molprobity_data[model_id] = result
+            elif result_type == 'reflections':
+                all_reflections_data[model_id] = result
+
     metrics_models = [ ]
     for model_id, model_data in enumerate(
         zip(

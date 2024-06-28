@@ -30,27 +30,19 @@ def generate_report(
     output_name_prefix="report"
 ):
 
-    model_paths = (previous_model_path, latest_model_path)
-    reflections_paths = (previous_reflections_path, latest_reflections_path)
-    sequence_paths = (previous_sequence_path, latest_sequence_path)
-    distpred_paths = (previous_distpred_path, latest_distpred_path)
-    model_json_paths = (previous_model_metrics_json, latest_model_metrics_json)
-
     # sanitise output file name
     output_name_prefix = output_name_prefix.replace('/','_').replace('.','_')
 
-    model_series = metrics_model_series_from_files(
-        model_paths,
-        reflections_paths,
-        sequence_paths,
-        distpred_paths,
-        run_covariance,
-        run_molprobity,
-        calculate_rama_z,
-        model_json_paths,
-        data_with_percentiles,
-        multiprocessing,
-    )
+    model_series = metrics_model_series_from_files((previous_model_path, latest_model_path),
+                                                   (previous_reflections_path, latest_reflections_path),
+                                                   (previous_sequence_path, latest_sequence_path),
+                                                   (previous_distpred_path, latest_distpred_path),
+                                                   (previous_model_metrics_json, latest_model_metrics_json),
+                                                   run_covariance,
+                                                   run_molprobity,
+                                                   calculate_rama_z,
+                                                   data_with_percentiles,
+                                                   multiprocessing)
     model_series_data = model_series.get_raw_data()
     panel = Panel(
         model_series_data,
