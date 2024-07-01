@@ -3,14 +3,16 @@ from multiprocessing import Process, Queue
 import subprocess
 import json
 import clipper
+import sys
 
-# from iris_validation.utils import ONE_LETTER_CODES
-# from iris_validation.metrics.residue import MetricsResidue
-# from iris_validation.metrics.chain import MetricsChain
+from iris_validation.utils import ONE_LETTER_CODES
+from iris_validation.metrics.residue import MetricsResidue
+from iris_validation.metrics.chain import MetricsChain
 from iris_validation.metrics.model import MetricsModel
 from iris_validation.metrics.series import MetricsModelSeries
 from iris_validation.metrics.reflections import ReflectionsHandler
 
+PYTEST_RUN = 'pytest' in sys.modules
 
 def _get_minimol_from_path(model_path):
     fpdb = clipper.MMDBfile()
@@ -188,6 +190,9 @@ def _get_tortoize_data(model_path, seq_nums, model_id=None, out_queue=None):
 
     tortoize_output = tortoize_process.communicate()[0]
     tortoize_dict = json.loads(tortoize_output)
+    if PYTEST_RUN : 
+        with open("tortoize.json", "w") as json_output :
+            json.dump(tortoize_dict, json_output, indent=2)
     residues = tortoize_dict["model"]["1"]["residues"]
     for res in residues:
         rama_z_data[res['pdb']['strandID']][res['pdb']['seqNum']] = res['ramachandran']['z-score']
@@ -280,7 +285,7 @@ def metrics_model_series_from_files(model_paths,
                 num_queued += 1
                 print ("Adding covariance data")
             else:
-                covariance_data = _get_covariance_data(model_path, sequence_path, distpred_path)
+                covariance_data = _get_covariance_data(model_path, sequence_path, distpred_path, seq_nums)
         if run_molprobity:
             if multiprocessing:
                 p = Process(target=_get_molprobity_data,
@@ -315,7 +320,8 @@ def metrics_model_series_from_files(model_paths,
             else:
                 rama_z_data = _get_tortoize_data(model_path, seq_nums)
 
-        print (num_queued)
+        if multiprocessing and PYTEST_RUN : 
+            print (f"Number of data sources queued: {num_queued}")
         all_minimol_data.append(minimol)
         all_covariance_data.append(covariance_data)
         all_molprobity_data.append(molprobity_data)
@@ -332,7 +338,7 @@ def metrics_model_series_from_files(model_paths,
                 all_rama_z_data[model_id] = result
             if result_type == 'molprobity':
                 all_molprobity_data[model_id] = result
-            elif result_type == 'reflections':
+            if result_type == 'reflections':
                 all_reflections_data[model_id] = result
 
     metrics_models = [ ]
