@@ -254,6 +254,11 @@ class Panel:
                                        onclick=f'toggleDropdown();'))
 
         # Version toggle switch
+        self.dwg.add(self.dwg.text(text='Model version',
+                                   insert=(chain_view_bounds[2]-385, chain_view_bounds[1]+20),
+                                   font_size=view_title_font,
+                                   font_family='Arial'))
+
         self.dwg.add(self.dwg.text(text=self.custom_labels['Previous'],
                                    insert=(chain_view_bounds[2]-215, chain_view_bounds[1]+20),
                                    font_size=16,

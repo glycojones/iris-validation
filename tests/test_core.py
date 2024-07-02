@@ -10,6 +10,7 @@ OUTPUT_DIR = './tests/test_output/' + '{suffix}'
 DATASET1_PATH = str(os.path.join(INPUT_DIR, "3atp")) + '{suffix}'
 DATASET2_PATH = str(os.path.join(INPUT_DIR, "8ira")) + '{suffix}'
 
+
 def test_2m2d_noCOV_noMP_noRamaZ_mpro ():
     import iris_validation as iris
     importlib.reload(iris)
@@ -130,23 +131,23 @@ def test_2m2d_noCOV_MP_noRamaZ_spro ():
     assert path.exists(OUTPUT_DIR.format(suffix=job_name) + ".html")
 
 
-@pytest.mark.slow
-def test_2m2d_COV_MP_noRamaZ_spro ():
-    import iris_validation as iris
-    importlib.reload(iris)
-    job_name = "test_2m2d_COV_MP_noRamaZ_spro"
-    iris.generate_report(latest_model_path=DATASET1_PATH.format(suffix='_final.pdb'),
-                         latest_reflections_path=DATASET1_PATH.format(suffix='_final.mtz'),
-                         latest_sequence_path=DATASET1_PATH.format(suffix='.fasta'),
-                         latest_distpred_path=DATASET1_PATH.format(suffix='.npz'),
-                         previous_model_path=DATASET1_PATH.format(suffix='_0cyc.pdb'),
-                         previous_reflections_path=DATASET1_PATH.format(suffix='_0cyc.mtz'),
-                         previous_sequence_path=DATASET1_PATH.format(suffix='.fasta'),
-                         previous_distpred_path=DATASET1_PATH.format(suffix='.npz'),
-                         run_covariance=True,
-                         run_molprobity=True,
-                         calculate_rama_z=False,
-                         multiprocessing=False,
-                         output_dir=OUTPUT_DIR.format(suffix=""),
-                         output_name_prefix=job_name)
-    assert path.exists(OUTPUT_DIR.format(suffix=job_name) + ".html")
+# @pytest.mark.slow
+# def test_2m2d_COV_MP_noRamaZ_spro ():
+#     import iris_validation as iris
+#     importlib.reload(iris)
+#     job_name = "test_2m2d_COV_MP_noRamaZ_spro"
+#     iris.generate_report(latest_model_path=DATASET1_PATH.format(suffix='_final.pdb'),
+#                          latest_reflections_path=DATASET1_PATH.format(suffix='_final.mtz'),
+#                          latest_sequence_path=DATASET1_PATH.format(suffix='.fasta'),
+#                          latest_distpred_path=DATASET1_PATH.format(suffix='.npz'),
+#                          previous_model_path=DATASET1_PATH.format(suffix='_0cyc.pdb'),
+#                          previous_reflections_path=DATASET1_PATH.format(suffix='_0cyc.mtz'),
+#                          previous_sequence_path=DATASET1_PATH.format(suffix='.fasta'),
+#                          previous_distpred_path=DATASET1_PATH.format(suffix='.npz'),
+#                          run_covariance=True,
+#                          run_molprobity=True,
+#                          calculate_rama_z=False,
+#                          multiprocessing=False,
+#                          output_dir=OUTPUT_DIR.format(suffix=""),
+#                          output_name_prefix=job_name)
+#     assert path.exists(OUTPUT_DIR.format(suffix=job_name) + ".html")

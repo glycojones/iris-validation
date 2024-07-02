@@ -5,6 +5,7 @@ import svgwrite
 from svgwrite.animate import Animate
 
 from iris_validation._defs import COLORS, CHAIN_VIEW_RINGS, CHAIN_VIEW_GAP_ANGLE
+from iris_validation._version import version_tuple 
 
 
 class ChainView:
@@ -142,21 +143,35 @@ class ChainView:
 
         # Draw center text
         self.dwg.add(self.dwg.text(text='Iris',
-                                   insert=(self.center[0], self.center[1]-24),
-                                   font_size=1.5*16,
+                                   insert=(self.center[0], self.center[1]-22),
+                                   font_size=1.5*18,
                                    font_family='Arial',
                                    font_weight='bold',
                                    text_anchor='middle',
                                    alignment_baseline='central'))
+        self.dwg.add(self.dwg.text(text='Release ' + '.'.join(map(str, version_tuple[:3])),
+                                   insert=(self.center[0], self.center[1]),
+                                   font_size=14,
+                                   font_family='Arial',
+                                   text_anchor='middle',
+                                   alignment_baseline='central'))
         self.dwg.add(self.dwg.text(text='Chain ' + self.data['chain_id'],
-                                   insert=(self.center[0], self.center[1]+16),
+                                   insert=(self.center[0], self.center[1]+18),
                                    font_size=16,
                                    font_family='Arial',
                                    text_anchor='middle',
                                    alignment_baseline='central'))
         if self.data['has_molprobity']:
             self.dwg.add(self.dwg.text(text='MolProbity',
-                                       insert=(self.center[0], self.center[1]+48),
+                                       insert=(self.center[0], self.center[1]+50),
+                                       font_size=16,
+                                       font_family='Arial',
+                                       text_anchor='middle',
+                                       alignment_baseline='central',
+                                       fill=COLORS['L_GREY']))
+        elif self.data['has_rama_z']:
+            self.dwg.add(self.dwg.text(text='Tortoize',
+                                       insert=(self.center[0], self.center[1]+50),
                                        font_size=16,
                                        font_family='Arial',
                                        text_anchor='middle',
