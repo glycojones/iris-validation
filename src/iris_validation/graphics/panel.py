@@ -33,9 +33,11 @@ class Panel:
         residue_bars_to_display=None,
         percentile_bar_label=None,
         percentile_bar_range=None,
+        custom_labels={'Latest':'Latest', 'Previous':'Previous'}
     ):
         self.data = data
         self.canvas_size = canvas_size
+        self.custom_labels = custom_labels
         self.chain_view_rings = CHAIN_VIEW_RINGS
         if continuous_metrics_to_display:
             self.chain_view_rings = self.get_chain_view_rings(
@@ -252,12 +254,12 @@ class Panel:
                                        onclick=f'toggleDropdown();'))
 
         # Version toggle switch
-        self.dwg.add(self.dwg.text(text='Previous',
+        self.dwg.add(self.dwg.text(text=self.custom_labels['Previous'],
                                    insert=(chain_view_bounds[2]-215, chain_view_bounds[1]+20),
                                    font_size=16,
                                    font_family='Arial'))
 
-        self.dwg.add(self.dwg.text(text='Latest',
+        self.dwg.add(self.dwg.text(text=self.custom_labels['Latest'],
                                    insert=(chain_view_bounds[2]-55, chain_view_bounds[1]+20),
                                    font_size=16,
                                    font_family='Arial'))

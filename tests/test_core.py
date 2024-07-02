@@ -1,17 +1,18 @@
 import os
 import time
 import pytest
+import importlib 
 from os import path
 
 INPUT_DIR = './tests/test_data/'
 OUTPUT_DIR = './tests/test_output/' + '{suffix}'
 
 DATASET1_PATH = str(os.path.join(INPUT_DIR, "3atp")) + '{suffix}'
-DATASET2_PATH = str(os.path.join(INPUT_DIR, "refined")) + '{suffix}'
-
+DATASET2_PATH = str(os.path.join(INPUT_DIR, "8ira")) + '{suffix}'
 
 def test_2m2d_noCOV_noMP_noRamaZ_mpro ():
     import iris_validation as iris
+    importlib.reload(iris)
     job_name = "2m2d_noCOV_noMP_noRamaZ_mpro"      
     iris.generate_report(latest_model_path=DATASET1_PATH.format(suffix='_final.pdb'),
                          latest_reflections_path=DATASET1_PATH.format(suffix='_final.mtz'),
@@ -22,15 +23,17 @@ def test_2m2d_noCOV_noMP_noRamaZ_mpro ():
                          run_molprobity=False,
                          calculate_rama_z=False,
                          multiprocessing=True,
-                         output_name_prefix=job_name)
+                         output_name_prefix=job_name,
+                         custom_labels={'Latest':'Refined', 'Previous':'Starting'} )
     assert path.exists(OUTPUT_DIR.format(suffix=job_name) + ".html")
 
 
 def test_2m0d_noCOV_noMP_noRamaZ_mpro ():
     import iris_validation as iris
+    importlib.reload(iris)
     job_name = "2m0d_noCOV_noMP_noRamaZ_mpro"      
-    iris.generate_report(latest_model_path=DATASET2_PATH.format(suffix='.mmcif'),
-                         previous_model_path=DATASET2_PATH.format(suffix='.pdb'),
+    iris.generate_report(latest_model_path=DATASET1_PATH.format(suffix='_final.pdb'),
+                         previous_model_path=DATASET1_PATH.format(suffix='_0cyc.pdb'),
                          output_dir=OUTPUT_DIR.format(suffix=""),
                          run_covariance=False,
                          run_molprobity=False,
@@ -39,9 +42,28 @@ def test_2m0d_noCOV_noMP_noRamaZ_mpro ():
                          output_name_prefix=job_name)
     assert path.exists(OUTPUT_DIR.format(suffix=job_name) + ".html")
 
+
+def test_2m2d_16chains_noCOV_noMP_noRamaZ_spro ():
+    import iris_validation as iris
+    importlib.reload(iris)
+    job_name = "2m2d_16chains_noCOV_noMP_noRamaZ_spro"      
+    iris.generate_report(latest_model_path=DATASET2_PATH.format(suffix='.cif'),
+                         latest_reflections_path=DATASET2_PATH.format(suffix='.mtz'),
+                         previous_model_path=DATASET2_PATH.format(suffix='_final.cif'),
+                         previous_reflections_path=DATASET2_PATH.format(suffix='.mtz'),
+                         output_dir=OUTPUT_DIR.format(suffix=""),
+                         run_covariance=False,
+                         run_molprobity=False,
+                         calculate_rama_z=False,
+                         multiprocessing=False,
+                         output_name_prefix=job_name)
+    assert path.exists(OUTPUT_DIR.format(suffix=job_name) + ".html")
+
+
 @pytest.mark.problem
 def test_1m1d_noCOV_noMP_noRamaZ_mpro ():
     import iris_validation as iris
+    importlib.reload(iris)
     job_name = "1m1d_noCOV_noMP_noRamaZ_mpro"      
     iris.generate_report(latest_model_path=DATASET1_PATH.format(suffix='_final.pdb'),
                          latest_reflections_path=DATASET1_PATH.format(suffix='_final.mtz'),
@@ -49,13 +71,14 @@ def test_1m1d_noCOV_noMP_noRamaZ_mpro ():
                          run_covariance=False,
                          run_molprobity=False,
                          calculate_rama_z=False,
-                         multiprocessing=True,
+                         multiprocessing=False,
                          output_name_prefix=job_name)
     assert path.exists(OUTPUT_DIR.format(suffix=job_name) + ".html")
 
 
 def test_1m1d_noCOV_noMP_noRamaZ_spro ():
     import iris_validation as iris
+    importlib.reload(iris)
     job_name = "1m1d_noCOV_noMP_noRamaZ_spro"      
     iris.generate_report(latest_model_path=DATASET1_PATH.format(suffix='_final.pdb'),
                          latest_reflections_path=DATASET1_PATH.format(suffix='_final.mtz'),
@@ -70,6 +93,7 @@ def test_1m1d_noCOV_noMP_noRamaZ_spro ():
 @pytest.mark.tortoize
 def test_2m2d_noCOV_noMP_RamaZ_mpro ():
     import iris_validation as iris
+    importlib.reload(iris)
     job_name = "2m2d_noCOV_noMP_RamaZ_mpro"
     iris.generate_report(latest_model_path=DATASET1_PATH.format(suffix='_final.pdb'),
                          latest_reflections_path=DATASET1_PATH.format(suffix='_final.mtz'),
@@ -91,6 +115,7 @@ def test_2m2d_noCOV_noMP_RamaZ_mpro ():
 @pytest.mark.molprobity
 def test_2m2d_noCOV_MP_noRamaZ_spro ():
     import iris_validation as iris
+    importlib.reload(iris)
     job_name = "test_2m2d_noCOV_MP_noRamaZ_spro"
     iris.generate_report(latest_model_path=DATASET1_PATH.format(suffix='_final.pdb'),
                          latest_reflections_path=DATASET1_PATH.format(suffix='_final.mtz'),
@@ -99,7 +124,7 @@ def test_2m2d_noCOV_MP_noRamaZ_spro ():
                          run_covariance=False,
                          run_molprobity=True,
                          calculate_rama_z=False,
-                         multiprocessing=True,
+                         multiprocessing=False,
                          output_dir=OUTPUT_DIR.format(suffix=""),
                          output_name_prefix=job_name)
     assert path.exists(OUTPUT_DIR.format(suffix=job_name) + ".html")
@@ -108,6 +133,7 @@ def test_2m2d_noCOV_MP_noRamaZ_spro ():
 @pytest.mark.slow
 def test_2m2d_COV_MP_noRamaZ_spro ():
     import iris_validation as iris
+    importlib.reload(iris)
     job_name = "test_2m2d_COV_MP_noRamaZ_spro"
     iris.generate_report(latest_model_path=DATASET1_PATH.format(suffix='_final.pdb'),
                          latest_reflections_path=DATASET1_PATH.format(suffix='_final.mtz'),

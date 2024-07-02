@@ -321,7 +321,7 @@ def metrics_model_series_from_files(model_paths,
                 rama_z_data = _get_tortoize_data(model_path, seq_nums)
 
         if multiprocessing and PYTEST_RUN : 
-            print (f"Number of data sources queued: {num_queued}")
+            print (f"\nNumber of data sources queued: {num_queued}")
         all_minimol_data.append(minimol)
         all_covariance_data.append(covariance_data)
         all_molprobity_data.append(molprobity_data)

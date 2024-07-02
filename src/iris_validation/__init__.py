@@ -27,7 +27,8 @@ def generate_report(
     percentile_bar_range=None,
     wrap_in_html=True,
     output_dir=None,
-    output_name_prefix="report"
+    output_name_prefix="report",
+    custom_labels={'Latest':'Latest', 'Previous':'Previous'}
 ):
 
     # sanitise output file name
@@ -51,6 +52,7 @@ def generate_report(
         residue_bars_to_display=residue_bars_to_display,
         percentile_bar_label=percentile_bar_label,
         percentile_bar_range=percentile_bar_range,
+        custom_labels=custom_labels
     )
     panel_string = panel.dwg.tostring()
 
