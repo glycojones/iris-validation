@@ -10,7 +10,7 @@ OUTPUT_DIR = './tests/test_output/' + '{suffix}'
 DATASET1_PATH = str(os.path.join(INPUT_DIR, "3atp")) + '{suffix}'
 DATASET2_PATH = str(os.path.join(INPUT_DIR, "8ira")) + '{suffix}'
 
-
+@pytest.mark.simple
 def test_2m2d_noCOV_noMP_noRamaZ_mpro ():
     import iris_validation as iris
     importlib.reload(iris)

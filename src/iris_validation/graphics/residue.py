@@ -145,8 +145,8 @@ class ResidueView:
         self.dwg.add(
             self.dwg.text(
                 self.percentile_bar_label,
-                insert=(self.canvas_size[0] / 2, bar_charts_bounds[3] + 50),
-                font_size=18,
+                insert=((self.canvas_size[0] / 2)+20, bar_charts_bounds[3] + 60),
+                font_size=24,
                 font_family="Arial",
                 fill=COLORS["BLACK"],
                 fill_opacity=1,

@@ -142,8 +142,8 @@ class Panel:
         middle_gap = 30
         view_border = 10
         view_title_font = 24
-        button_width = 38
-        button_height = 32
+        button_width = 26
+        button_height = 26
         view_width, view_height = [ dim - view_border for dim in self.canvas_size ]
         view_divider_x = round(2/3 * view_width, 2)
         chain_view_bounds = (view_border,
@@ -183,9 +183,15 @@ class Panel:
                                    font_size=view_title_font,
                                    font_family='Arial'))
 
-        self.dwg.add(self.dwg.text(text='Residue',
+
+        self.dwg.add(self.dwg.text(text='Amino acid',
                                    insert=(residue_view_bounds[0], residue_view_bounds[1]+view_title_font),
                                    font_size=view_title_font,
+                                   font_family='Arial'))
+        
+        self.dwg.add(self.dwg.text(text='',
+                                   insert=(residue_view_bounds[0]+130, residue_view_bounds[1]+view_title_font),
+                                   font_size=16,
                                    font_family='Arial',
                                    id=f'{self.svg_id}-residue-summary'))
 
@@ -200,9 +206,9 @@ class Panel:
                                    stroke_width=2))
 
         # Chain selector buttons
-        for chain_index, chain_id in enumerate(self.chain_ids[:12]):
+        for chain_index, chain_id in enumerate(self.chain_ids[:16]):
             selector_color = self.swtich_colors[1] if chain_index == 0 else self.swtich_colors[0]
-            self.dwg.add(self.dwg.rect(insert=(chain_view_bounds[0] + 75 + 50*chain_index, chain_view_bounds[1]),
+            self.dwg.add(self.dwg.rect(insert=(chain_view_bounds[0] + 75 + 30*chain_index, chain_view_bounds[1]+5),
                                        size=(button_width, button_height),
                                        rx=5,
                                        stroke_opacity=0,
@@ -211,13 +217,13 @@ class Panel:
                                        id=f'{self.svg_id}-chain-selector-{chain_index}'))
 
             self.dwg.add(self.dwg.text(text=chain_id,
-                                       insert=(chain_view_bounds[0] + 75 + button_width/2 + 50*chain_index, chain_view_bounds[1] + button_height/2),
-                                       font_size=view_title_font,
+                                       insert=(chain_view_bounds[0] + 75 + button_width/2 + 30*chain_index, chain_view_bounds[1] + 5 + button_height/2),
+                                       font_size=16,
                                        font_family='Arial',
                                        text_anchor='middle',
                                        alignment_baseline='central'))
 
-            self.dwg.add(self.dwg.rect(insert=(chain_view_bounds[0] + 75 + 50*chain_index, chain_view_bounds[1]),
+            self.dwg.add(self.dwg.rect(insert=(chain_view_bounds[0] + 75 + 30*chain_index, chain_view_bounds[1]+5),
                                        size=(button_width, button_height),
                                        rx=5,
                                        stroke_opacity=0,
@@ -228,11 +234,11 @@ class Panel:
 
         # Extra chains dropdown
         # TODO: finish this
-        if len(self.chain_ids) > 12:
-            chain_index = 12
+        if len(self.chain_ids) > 16:
+            chain_index = 16
             selector_color = self.swtich_colors[0]
-            self.dwg.add(self.dwg.rect(insert=(chain_view_bounds[0] + 75 + 50*chain_index, chain_view_bounds[1]),
-                                       size=(38, 32),
+            self.dwg.add(self.dwg.rect(insert=(chain_view_bounds[0] + 75 + 30*chain_index, chain_view_bounds[1] +5),
+                                       size=(26, 26),
                                        rx=5,
                                        stroke_opacity=0,
                                        fill_opacity=0.5,
@@ -240,12 +246,12 @@ class Panel:
                                        id=f'{self.svg_id}-chain-selector-dropdown'))
 
             self.dwg.add(self.dwg.text(text='...',
-                                       insert=(chain_view_bounds[0] + 85 + 50*chain_index, chain_view_bounds[1]+view_title_font),
-                                       font_size=view_title_font,
+                                       insert=(chain_view_bounds[0] + 80 + 30*chain_index, chain_view_bounds[1]+24),
+                                       font_size=16,
                                        font_family='Arial'))
 
-            self.dwg.add(self.dwg.rect(insert=(chain_view_bounds[0] + 75 + 50*chain_index, chain_view_bounds[1]),
-                                       size=(38, 32),
+            self.dwg.add(self.dwg.rect(insert=(chain_view_bounds[0] + 75 + 30*chain_index, chain_view_bounds[1]+5),
+                                       size=(26, 26),
                                        rx=5,
                                        stroke_opacity=0,
                                        fill_opacity=0,
@@ -255,7 +261,7 @@ class Panel:
 
         # Version toggle switch
         self.dwg.add(self.dwg.text(text='Model version',
-                                   insert=(chain_view_bounds[2]-385, chain_view_bounds[1]+20),
+                                   insert=(chain_view_bounds[2]-380, chain_view_bounds[1]+20),
                                    font_size=view_title_font,
                                    font_family='Arial'))
 

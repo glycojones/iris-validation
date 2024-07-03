@@ -294,7 +294,7 @@ function updateSelectedResidue() {
   // Set summary text
   let seqNum = modelData[selectedChain]['residue_seqnos'][selectedVersion][selectedResidue];
   let aaCode = modelData[selectedChain]['residue_codes'][selectedVersion][selectedResidue];
-  residueSummary.textContent = 'Residue ' + seqNum + ' (' + aaCode + ')';
+  residueSummary.textContent = seqNum + ' (' + aaCode + ')';
 };
 
 

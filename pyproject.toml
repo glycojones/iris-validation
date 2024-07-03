@@ -37,6 +37,7 @@ Issues = "https://github.com/glycojones/iris-validation/issues"
 [tool.pytest.ini_options]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "simple: a simple test to get output quickly (deselect with '-m \"not simple\"')",
     "tortoize: runs tortoize tests (deselect with '-m \"not tortoize\"')",
     "molprobity: runs molprobity tests (deselect with '-m \"not molprobity\"')",
     "problem",

@@ -12,7 +12,6 @@ from iris_validation.metrics.model import MetricsModel
 from iris_validation.metrics.series import MetricsModelSeries
 from iris_validation.metrics.reflections import ReflectionsHandler
 
-PYTEST_RUN = 'pytest' in sys.modules
 
 def _get_minimol_from_path(model_path):
     fpdb = clipper.MMDBfile()
@@ -190,9 +189,7 @@ def _get_tortoize_data(model_path, seq_nums, model_id=None, out_queue=None):
 
     tortoize_output = tortoize_process.communicate()[0]
     tortoize_dict = json.loads(tortoize_output)
-    if PYTEST_RUN : 
-        with open("tortoize.json", "w") as json_output :
-            json.dump(tortoize_dict, json_output, indent=2)
+
     residues = tortoize_dict["model"]["1"]["residues"]
     for res in residues:
         rama_z_data[res['pdb']['strandID']][res['pdb']['seqNum']] = res['ramachandran']['z-score']
@@ -320,8 +317,6 @@ def metrics_model_series_from_files(model_paths,
             else:
                 rama_z_data = _get_tortoize_data(model_path, seq_nums)
 
-        if multiprocessing and PYTEST_RUN : 
-            print (f"\nNumber of data sources queued: {num_queued}")
         all_minimol_data.append(minimol)
         all_covariance_data.append(covariance_data)
         all_molprobity_data.append(molprobity_data)

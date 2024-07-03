@@ -1,8 +1,11 @@
 import os
+import sys
+import json
 
 from iris_validation.graphics import Panel
 from iris_validation.metrics import metrics_model_series_from_files
 
+PYTEST_RUN = 'pytest' in sys.modules
 
 def generate_report(
     latest_model_path,
@@ -44,7 +47,13 @@ def generate_report(
                                                    calculate_rama_z,
                                                    data_with_percentiles,
                                                    multiprocessing)
+    
     model_series_data = model_series.get_raw_data()
+    
+    if PYTEST_RUN : 
+        with open(os.path.join(output_dir, output_name_prefix + ".json"), 'w', encoding='utf8') as json_output :
+            json.dump(model_series_data, json_output, indent=2)
+
     panel = Panel(
         model_series_data,
         continuous_metrics_to_display=continuous_metrics_to_display,
