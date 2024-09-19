@@ -1,4 +1,22 @@
-build/
-.vscode
+# Byte-compiled / optimized / DLL files
 __pycache__/
-PKG-INFO
+*.py[co]
+*$py.class
+
+# Mac meta stuff
+# DS_Store
+.DS_Store
+
+# Ignore build related files
+/dist
+/build
+/.eggs/
+/pyrun/
+
+# Ignore accidental test data
+/*.cif
+/*.pdb
+/*.ent
+/*.json
+/*.mtz
+/*.crd

@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iris_validation"
+dynamic=["version"]
+description = "A package for interactive all-in-one graphical validation of 3D protein model iterations"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.8",
+]
+authors = [
+    { name = "William Rochira", email = "william.rochira@hotmail.co.uk" },
+    { name = "Jon Agirre", email = "jon.agirre@york.ac.uk" }
+]
+maintainers = [
+    { name = "Jon Agirre", email = "jon.agirre@york.ac.uk" },
+]
+dependencies = [
+    "svgwrite == 1.3.1"
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools_scm]
+version_file = "src/iris_validation/_version.py"
+
+[project.urls]
+Homepage = "https://github.com/glycojones/iris-validation"
+Issues = "https://github.com/glycojones/iris-validation/issues"
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "simple: a simple test to get output quickly (deselect with '-m \"not simple\"')",
+    "tortoize: runs tortoize tests (deselect with '-m \"not tortoize\"')",
+    "molprobity: runs molprobity tests (deselect with '-m \"not molprobity\"')",
+    "problem",
+]
