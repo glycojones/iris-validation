@@ -9,6 +9,7 @@ OUTPUT_DIR = './tests/test_output/' + '{suffix}'
 
 DATASET1_PATH = str(os.path.join(INPUT_DIR, "3atp")) + '{suffix}'
 DATASET2_PATH = str(os.path.join(INPUT_DIR, "8ira")) + '{suffix}'
+DATASET3_PATH = str(os.path.join(INPUT_DIR, "5ni1")) + '{suffix}'
 
 @pytest.mark.simple
 def test_2m2d_noCOV_noMP_noRamaZ_mpro ():
@@ -61,7 +62,7 @@ def test_2m2d_16chains_noCOV_noMP_noRamaZ_spro ():
     assert path.exists(OUTPUT_DIR.format(suffix=job_name) + ".html")
 
 
-@pytest.mark.problem
+# multiprocessing is definitely an issue - test wll run in single process mode until sorted
 def test_1m1d_noCOV_noMP_noRamaZ_mpro ():
     import iris_validation as iris
     importlib.reload(iris)
@@ -126,6 +127,23 @@ def test_2m2d_noCOV_MP_noRamaZ_spro ():
                          run_molprobity=True,
                          calculate_rama_z=False,
                          multiprocessing=False,
+                         output_dir=OUTPUT_DIR.format(suffix=""),
+                         output_name_prefix=job_name)
+    assert path.exists(OUTPUT_DIR.format(suffix=job_name) + ".html")
+
+@pytest.mark.json
+def test_json ():
+    import iris_validation as iris
+    importlib.reload(iris)
+    job_name = "test_json"
+    iris.generate_report(latest_model_path=DATASET3_PATH.format(suffix='_refined.pdb'),
+                         previous_model_path=DATASET3_PATH.format(suffix='.pdb'),
+                         latest_model_metrics_json=DATASET3_PATH.format(suffix='_refined_data.json'),
+                         previous_model_metrics_json=DATASET3_PATH.format(suffix='_data.json'),
+                         data_with_percentiles=["map_fit"],
+                         continuous_metrics_to_display=["Avg. B","Std. B","Res. Fit","Rama Z"],
+                         residue_bars_to_display=["Res. Fit"],
+                         percentile_bar_range=[-3,3],
                          output_dir=OUTPUT_DIR.format(suffix=""),
                          output_name_prefix=job_name)
     assert path.exists(OUTPUT_DIR.format(suffix=job_name) + ".html")

@@ -40,5 +40,5 @@ markers = [
     "simple: a simple test to get output quickly (deselect with '-m \"not simple\"')",
     "tortoize: runs tortoize tests (deselect with '-m \"not tortoize\"')",
     "molprobity: runs molprobity tests (deselect with '-m \"not molprobity\"')",
-    "problem",
+    "json: runs Agnel Joseph's code to import results from json files (deselect with '-m \"not json\"')" 
 ]
