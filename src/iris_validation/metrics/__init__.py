@@ -14,9 +14,17 @@ from iris_validation.metrics.reflections import ReflectionsHandler
 
 
 def _get_minimol_from_path(model_path):
+    MMDB_IgnoreElement = 0x00000080
+    MMDB_NoCoordRead = 0x00000002
+    MMDB_IgnoreBlankLines = 0x00000800
+    MMDB_IgnoreDuplSeqNum = 0x00000020
+    MMDB_IgnoreNonCoorPDBErrors = 0x00000200
+    MMDB_IgnoreRemarks = 0x00002000
+    MMDB_EnforceUniqueChainID = 0x00020000
     fpdb = clipper.MMDBfile()
     minimol = clipper.MiniMol()
-    try:
+    try:      
+        fpdb.SetFlag(MMDB_IgnoreElement | MMDB_IgnoreBlankLines | MMDB_IgnoreNonCoorPDBErrors)
         fpdb.read_file(model_path)
         fpdb.import_minimol(minimol)
     except Exception as exception:
