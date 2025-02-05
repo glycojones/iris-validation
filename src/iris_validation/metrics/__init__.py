@@ -14,17 +14,29 @@ from iris_validation.metrics.reflections import ReflectionsHandler
 
 
 def _get_minimol_from_path(model_path):
-    MMDB_IgnoreElement = 0x00000080
-    MMDB_NoCoordRead = 0x00000002
-    MMDB_IgnoreBlankLines = 0x00000800
-    MMDB_IgnoreDuplSeqNum = 0x00000020
+    MMDB_AutoSerials            = 0x00000001
+    MMDB_NoCoordRead            = 0x00000002
+    MMDB_SimRWBROOK             = 0x00000004
+    MMDB_PrintCIFWarnings       = 0x00000008
+    MMDB_EnforceSpaces          = 0x00000010
+    MMDB_IgnoreDuplSeqNum       = 0x00000020
+    MMDB_IgnoreSegID            = 0x00000040
+    MMDB_IgnoreElement          = 0x00000080
+    MMDB_IgnoreCharge           = 0x00000100
     MMDB_IgnoreNonCoorPDBErrors = 0x00000200
-    MMDB_IgnoreRemarks = 0x00002000
-    MMDB_EnforceUniqueChainID = 0x00020000
+    MMDB_IgnoreUnmatch          = 0x00000400
+    MMDB_IgnoreBlankLines       = 0x00000800
+    MMDB_IgnoreHash             = 0x00001000
+    MMDB_IgnoreRemarks          = 0x00002000
+    MMDB_AllowDuplChainID       = 0x00004000
+    MMDB_FixSpaceGroup          = 0x00008000
+    MMDB_EnforceAtomNames       = 0x00010000
+    MMDB_EnforceUniqueChainID   = 0x00020000
+    MMDB_DoNotProcessSpaceGroup = 0x00040000
     fpdb = clipper.MMDBfile()
     minimol = clipper.MiniMol()
     try:      
-        fpdb.SetFlag(MMDB_IgnoreElement | MMDB_IgnoreBlankLines | MMDB_IgnoreNonCoorPDBErrors)
+        #fpdb.SetFlag(MMDB_IgnoreElement | MMDB_IgnoreBlankLines | MMDB_IgnoreNonCoorPDBErrors)
         fpdb.read_file(model_path)
         fpdb.import_minimol(minimol)
     except Exception as exception:
@@ -112,8 +124,11 @@ def _get_molprobity_data(model_path, seq_nums, model_id=None, out_queue=None):
                 for atom in result.atoms_info:
                     chain_id = atom.chain_id.strip()
                     seq_num = int(atom.resseq.strip())
-                    if molprobity_data[chain_id][seq_num][category] > 0:
-                        molprobity_data[chain_id][seq_num][category] -= 1
+                    try: 
+                        if molprobity_data[chain_id][seq_num][category] > 0:
+                            molprobity_data[chain_id][seq_num][category] -= 1
+                    except: 
+                        print (f"chain id: {chain_id}, seq_num: {seq_num} category: {category}")
                 details_line = [ ' '.join(a.id_str().split()) for a in result.atoms_info ] + [ result.overlap ]
                 molprobity_data['model_wide']['details'][category].append(details_line)
                 continue
