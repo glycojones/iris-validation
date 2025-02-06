@@ -14,6 +14,7 @@ from iris_validation.metrics.reflections import ReflectionsHandler
 
 
 def _get_minimol_from_path(model_path):
+    # The following MMDB flags are not defined in clipper-python
     MMDB_AutoSerials            = 0x00000001
     MMDB_NoCoordRead            = 0x00000002
     MMDB_SimRWBROOK             = 0x00000004
@@ -36,7 +37,7 @@ def _get_minimol_from_path(model_path):
     fpdb = clipper.MMDBfile()
     minimol = clipper.MiniMol()
     try:      
-        #fpdb.SetFlag(MMDB_IgnoreElement | MMDB_IgnoreBlankLines | MMDB_IgnoreNonCoorPDBErrors)
+        fpdb.SetFlag(MMDB_IgnoreElement | MMDB_IgnoreBlankLines | MMDB_IgnoreNonCoorPDBErrors)
         fpdb.read_file(model_path)
         fpdb.import_minimol(minimol)
     except Exception as exception:
@@ -203,7 +204,7 @@ def _get_tortoize_data(model_path, seq_nums, model_id=None, out_queue=None):
     rama_z_data = {chain_id: {} for chain_id in seq_nums.keys()}
     tortoize_process = subprocess.Popen(
         ['tortoize', str(model_path)],
-        shell=True,
+        shell=False, # False because Linux shell expects whole command in a string not a list
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
     try:
