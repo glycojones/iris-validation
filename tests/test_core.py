@@ -10,6 +10,7 @@ OUTPUT_DIR = './tests/test_output/' + '{suffix}'
 DATASET1_PATH = str(os.path.join(INPUT_DIR, "3atp")) + '{suffix}'
 DATASET2_PATH = str(os.path.join(INPUT_DIR, "8ira")) + '{suffix}'
 DATASET3_PATH = str(os.path.join(INPUT_DIR, "5ni1")) + '{suffix}'
+DATASET4_PATH = str(os.path.join(INPUT_DIR, "neutron")) + '{suffix}'
 
 @pytest.mark.simple
 def test_2m2d_noCOV_noMP_noRamaZ_mpro ():
@@ -84,6 +85,20 @@ def test_1m1d_noCOV_noMP_noRamaZ_spro ():
     job_name = "1m1d_noCOV_noMP_noRamaZ_spro"      
     iris.generate_report(latest_model_path=DATASET1_PATH.format(suffix='_final.pdb'),
                          latest_reflections_path=DATASET1_PATH.format(suffix='_final.mtz'),
+                         output_dir=OUTPUT_DIR.format(suffix=""),
+                         run_covariance=False,
+                         run_molprobity=False,
+                         calculate_rama_z=False,
+                         multiprocessing=False,
+                         output_name_prefix=job_name)
+    assert path.exists(OUTPUT_DIR.format(suffix=job_name) + ".html")
+
+def test_neutron ():
+    import iris_validation as iris
+    importlib.reload(iris)
+    job_name = "neutron"      
+    iris.generate_report(latest_model_path=DATASET4_PATH.format(suffix='.pdb'),
+                         #latest_reflections_path=DATASET4_PATH.format(suffix='.mtz'),
                          output_dir=OUTPUT_DIR.format(suffix=""),
                          run_covariance=False,
                          run_molprobity=False,
