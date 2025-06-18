@@ -3,7 +3,6 @@ from multiprocessing import Process, Queue
 import subprocess
 import json
 import clipper
-import sys
 
 from iris_validation.utils import ONE_LETTER_CODES
 from iris_validation.metrics.residue import MetricsResidue
@@ -14,30 +13,9 @@ from iris_validation.metrics.reflections import ReflectionsHandler
 
 
 def _get_minimol_from_path(model_path):
-    # The following MMDB flags are not defined in clipper-python
-    MMDB_AutoSerials            = 0x00000001
-    MMDB_NoCoordRead            = 0x00000002
-    MMDB_SimRWBROOK             = 0x00000004
-    MMDB_PrintCIFWarnings       = 0x00000008
-    MMDB_EnforceSpaces          = 0x00000010
-    MMDB_IgnoreDuplSeqNum       = 0x00000020
-    MMDB_IgnoreSegID            = 0x00000040
-    MMDB_IgnoreElement          = 0x00000080
-    MMDB_IgnoreCharge           = 0x00000100
-    MMDB_IgnoreNonCoorPDBErrors = 0x00000200
-    MMDB_IgnoreUnmatch          = 0x00000400
-    MMDB_IgnoreBlankLines       = 0x00000800
-    MMDB_IgnoreHash             = 0x00001000
-    MMDB_IgnoreRemarks          = 0x00002000
-    MMDB_AllowDuplChainID       = 0x00004000
-    MMDB_FixSpaceGroup          = 0x00008000
-    MMDB_EnforceAtomNames       = 0x00010000
-    MMDB_EnforceUniqueChainID   = 0x00020000
-    MMDB_DoNotProcessSpaceGroup = 0x00040000
     fpdb = clipper.MMDBfile()
     minimol = clipper.MiniMol()
-    try:      
-        fpdb.SetFlag(MMDB_IgnoreElement | MMDB_IgnoreBlankLines | MMDB_IgnoreNonCoorPDBErrors)
+    try:
         fpdb.read_file(model_path)
         fpdb.import_minimol(minimol)
     except Exception as exception:

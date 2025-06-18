@@ -37,11 +37,11 @@ def generate_report(
     # sanitise output file name
     output_name_prefix = output_name_prefix.replace('/','_').replace('.','_')
 
-    model_series = metrics_model_series_from_files((previous_model_path, latest_model_path),
-                                                   (previous_reflections_path, latest_reflections_path),
-                                                   (previous_sequence_path, latest_sequence_path),
-                                                   (previous_distpred_path, latest_distpred_path),
-                                                   (previous_model_metrics_json, latest_model_metrics_json),
+    model_series = metrics_model_series_from_files((latest_model_path, previous_model_path),
+                                                   (latest_reflections_path, previous_reflections_path),
+                                                   (latest_sequence_path, previous_sequence_path),
+                                                   (latest_distpred_path, previous_distpred_path),
+                                                   (latest_model_metrics_json, previous_model_metrics_json),
                                                    run_covariance,
                                                    run_molprobity,
                                                    calculate_rama_z,
