@@ -21,4 +21,4 @@ PKG-INFO
 /*.json
 /*.mtz
 /*.crd
-test_output/
+test_output/*
