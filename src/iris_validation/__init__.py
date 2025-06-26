@@ -8,20 +8,20 @@ from iris_validation.metrics import metrics_model_series_from_files
 PYTEST_RUN = 'pytest' in sys.modules
 
 def generate_report(
-    latest_model_path,
-    latest_reflections_path=None,
-    latest_sequence_path=None,
-    latest_distpred_path=None,
-    previous_model_path=None,
-    previous_reflections_path=None,
-    previous_sequence_path=None,
-    previous_distpred_path=None,
+    first_model_path,
+    first_reflections_path=None,
+    first_sequence_path=None,
+    first_distpred_path=None,
+    second_model_path=None,
+    second_reflections_path=None,
+    second_sequence_path=None,
+    second_distpred_path=None,
     run_covariance=False,
     run_molprobity=False,
     calculate_rama_z=True,
     multiprocessing=True,
-    latest_model_metrics_json=None,
-    previous_model_metrics_json=None,
+    first_model_metrics_json=None,
+    second_model_metrics_json=None,
     data_with_percentiles=None,  # only works with model_metrics_json files
     discrete_metrics_to_display=None,
     continuous_metrics_to_display=None,
@@ -31,17 +31,60 @@ def generate_report(
     wrap_in_html=True,
     output_dir=None,
     output_name_prefix="report",
-    custom_labels={'Latest':'Latest', 'Previous':'Previous'}
+    custom_labels={'First':'First', 'Second':'Second'}
 ):
+    """
+    Generate a comparative or single-structure validation report from one or two structural models, 
+    with or without experimental data. 
+
+    This function creates a report that compares two models (or reports on a single model),
+    using various metrics and visualisations. It optionally includes MolProbity validation,
+    Ramachandran Z-score calculation via Tortoize, and residue-level bar plots, selectable by 
+    using the slider on the main graphics. The labels for the two models are customisable, so
+    they can be used after refinement (e.g. 'Input' and 'Refined') or to compare different 
+    data collections (e.g. 'cryo' and 'RT')
+
+    When two models are supplied, Iris will show the second one by default and add a selector 
+    button to toggle between first and second. 
+
+    Parameters:
+        first_model_path (str): Path to the first model file (PDB or mmCIF, mmCIF strongly preferred).
+        first_reflections_path (str, optional): Path to the first model's reflection data (MTZ or CIF).
+        first_sequence_path (str, optional): Path to the first model's sequence file (FASTA).
+        first_distpred_path (str, optional): Path to predicted distance distribution file for the first model.
+        second_model_path (str, optional): Path to the second model file, for comparison.
+        second_reflections_path (str, optional): Path to the second model's reflection data.
+        second_sequence_path (str, optional): Path to the second model's sequence file.
+        second_distpred_path (str, optional): Path to predicted distance distribution file for the second model.
+        run_covariance (bool, optional): If True, calculate coordinate covariance matrices.
+        run_molprobity (bool, optional): If True, run MolProbity validation via mmtbx (needs CCP4)
+        calculate_rama_z (bool, optional): If True, compute the Ramachandran Z-score via Tortoize (needs CCP4).
+        multiprocessing (bool, optional): If True, use multiprocessing to speed up calculations.
+        first_model_metrics_json (str, optional): Path to JSON file with precomputed metrics for the first model.
+        second_model_metrics_json (str, optional): Path to JSON file with precomputed metrics for the second model.
+        data_with_percentiles (dict, optional): JSON-like structure with percentile benchmarks for metrics.
+        discrete_metrics_to_display (list, optional): List of discrete metrics (e.g. ['clashscore']) to display.
+        continuous_metrics_to_display (list, optional): List of continuous metrics (e.g. side-chain fit) to display.
+        residue_bars_to_display (list, optional): List of residue-level metrics to display as bar charts.
+        percentile_bar_label (str, optional): Label for the percentile bar in summary plots.
+        percentile_bar_range (tuple, optional): Tuple defining the display range of the percentile bar (min, max).
+        wrap_in_html (bool, optional): If True, wraps the report in a standalone HTML page. 
+        output_dir (str, optional): Directory where the output report and files will be saved.
+        output_name_prefix (str, optional): Prefix for the output report filename. Default is "report".
+        custom_labels (dict, optional): Dictionary specifying custom labels for 'First' and 'Second' models.
+
+    Returns:
+        str: Path to the generated report file.
+    """
 
     # sanitise output file name
     output_name_prefix = output_name_prefix.replace('/','_').replace('.','_')
 
-    model_series = metrics_model_series_from_files((latest_model_path, previous_model_path),
-                                                   (latest_reflections_path, previous_reflections_path),
-                                                   (latest_sequence_path, previous_sequence_path),
-                                                   (latest_distpred_path, previous_distpred_path),
-                                                   (latest_model_metrics_json, previous_model_metrics_json),
+    model_series = metrics_model_series_from_files((first_model_path, second_model_path),
+                                                   (first_reflections_path, second_reflections_path),
+                                                   (first_sequence_path, second_sequence_path),
+                                                   (first_distpred_path, second_distpred_path),
+                                                   (first_model_metrics_json, second_model_metrics_json),
                                                    run_covariance,
                                                    run_molprobity,
                                                    calculate_rama_z,

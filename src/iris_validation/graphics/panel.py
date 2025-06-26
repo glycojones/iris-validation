@@ -33,7 +33,7 @@ class Panel:
         residue_bars_to_display=None,
         percentile_bar_label=None,
         percentile_bar_range=None,
-        custom_labels={'Latest':'Latest', 'Previous':'Previous'}
+        custom_labels={'First':'First', 'Second':'Second'}
     ):
         self.data = data
         self.canvas_size = canvas_size
@@ -257,71 +257,73 @@ class Panel:
                                        fill_opacity=0,
                                        onmouseover='setPointer();',
                                        onmouseout='unsetPointer();',
-                                       onclick=f'toggleDropdown();'))
+                                       onclick='toggleDropdown();'))
 
-        # Version toggle switch
-        self.dwg.add(self.dwg.text(text='Model version',
-                                   insert=(chain_view_bounds[2]-380, chain_view_bounds[1]+20),
-                                   font_size=view_title_font,
-                                   font_family='Arial'))
-
-        self.dwg.add(self.dwg.text(text=self.custom_labels['Previous'],
-                                   insert=(chain_view_bounds[2]-210, chain_view_bounds[1]+20),
-                                   font_size=16,
-                                   style='text-align: right;',
-                                   font_family='Arial'))
-
-        self.dwg.add(self.dwg.text(text=self.custom_labels['Latest'],
-                                   insert=(chain_view_bounds[2]-55, chain_view_bounds[1]+20),
-                                   font_size=16,
-                                   style='text-align: left;',
-                                   font_family='Arial'))
-
+        # Version toggle switch, only show it when there is more than one model
         if self.num_models > 1:
-            switch_group = self.dwg.g(id=f'{self.svg_id}-switch',
-                                      onmouseover='setPointer();',
-                                      onmouseout='unsetPointer();',
-                                      onclick='toggleVersion();')
-        else:
-            switch_group = self.dwg.g(id=f'{self.svg_id}-switch')
 
-        switch_rectangle = self.dwg.rect(insert=(chain_view_bounds[2]-140, chain_view_bounds[1]),
+            self.dwg.add(self.dwg.text(text='Model version',
+                                    insert=(chain_view_bounds[2]-380, chain_view_bounds[1]+20),
+                                    font_size=view_title_font,
+                                    font_family='Arial'))
+
+            self.dwg.add(self.dwg.text(text=self.custom_labels['First'],
+                                    insert=(chain_view_bounds[2]-210, chain_view_bounds[1]+20),
+                                    font_size=16,
+                                    style='text-align: right;',
+                                    font_family='Arial'))
+
+            self.dwg.add(self.dwg.text(text=self.custom_labels['Second'],
+                                    insert=(chain_view_bounds[2]-55, chain_view_bounds[1]+20),
+                                    font_size=16,
+                                    style='text-align: left;',
+                                    font_family='Arial'))
+
+            
+            switch_group = self.dwg.g(id=f'{self.svg_id}-switch',
+                                    onmouseover='setPointer();',
+                                    onmouseout='unsetPointer();',
+                                    onclick='toggleVersion();')
+        #else:
+        #    switch_group = self.dwg.g(id=f'{self.svg_id}-switch')
+
+            switch_rectangle = self.dwg.rect(insert=(chain_view_bounds[2]-140, chain_view_bounds[1]),
                                          size=(70, 30),
                                          rx=15,
                                          stroke_opacity=0,
                                          fill_opacity=1,
                                          fill=self.swtich_colors[1])
 
-        for version_id in range(2):
-            animation = Animate(values=None,
-                                dur='250ms',
-                                begin='indefinite',
-                                fill='freeze',
-                                attributeName='fill',
-                                to=self.swtich_colors[version_id],
-                                id=f'{self.svg_id}-switch-color-animation-{version_id}')
-            switch_rectangle.add(animation)
+            for version_id in range(2):
+                animation = Animate(values=None,
+                                    dur='250ms',
+                                    begin='indefinite',
+                                    fill='freeze',
+                                    attributeName='fill',
+                                    to=self.swtich_colors[version_id],
+                                    id=f'{self.svg_id}-switch-color-animation-{version_id}')
+                switch_rectangle.add(animation)
 
-        switch_group.add(switch_rectangle)
+            switch_group.add(switch_rectangle)
 
-        switch_circle = self.dwg.circle(r=10,
-                                        center=(chain_view_bounds[2]-85, chain_view_bounds[1]+15),
-                                        stroke_opacity=0,
-                                        fill_opacity=1,
-                                        fill=COLORS['WHITE'])
+            switch_circle = self.dwg.circle(r=10,
+                                            center=(chain_view_bounds[2]-85, chain_view_bounds[1]+15),
+                                            stroke_opacity=0,
+                                            fill_opacity=1,
+                                            fill=COLORS['WHITE'])
 
-        for version_id in range(2):
-            animation = Animate(values=None,
-                                dur='250ms',
-                                begin='indefinite',
-                                fill='freeze',
-                                attributeName='cx',
-                                to=(chain_view_bounds[2]-125, chain_view_bounds[2]-85)[version_id],
-                                id=f'{self.svg_id}-switch-move-animation-{version_id}')
-            switch_circle.add(animation)
+            for version_id in range(2):
+                animation = Animate(values=None,
+                                    dur='250ms',
+                                    begin='indefinite',
+                                    fill='freeze',
+                                    attributeName='cx',
+                                    to=(chain_view_bounds[2]-125, chain_view_bounds[2]-85)[version_id],
+                                    id=f'{self.svg_id}-switch-move-animation-{version_id}')
+                switch_circle.add(animation)
 
-        switch_group.add(switch_circle)
-        self.dwg.add(switch_group)
+            switch_group.add(switch_circle)
+            self.dwg.add(switch_group)
 
         # Place sub-views
         canvas_mid_x = self.canvas_size[0] / 2
