@@ -1,11 +1,39 @@
+"""
+iris_validation
+
+A Python package for interactive, all-in-one graphical validation of 3D protein models.
+
+This framework enables scientists to visualise per-residue validation metrics
+across entire protein chains in a compact, intuitive, and interactive radial
+diagram. It integrates standard metrics (e.g., MolProbity, Tortoize from PDB-REDO),
+highlighting model areas requiring attention.
+
+Key Features:
+-------------
+- Computes and visualises per-residue metrics: geometry, clashes, rotamers,
+  backbone conformations, and fit to electron density.
+- Supports integration with validation tools such as MolProbity and PDB-REDO.
+- Generates "ripple" effects on the radial plot to highlight problematic regions.
+- Provides both standalone CLI tools and modules for embedding in GUIs
+  (e.g., CCP4i2 or CCP4 Cloud).
+- Interactive plots to inspect individual residues and per-chain quality.
+
+Installation:
+-------------
+Available via pip, source code and most easily, through CCP4 (ccp4.ac.uk)
+"""
 import os
 import sys
 import json
+from types import MappingProxyType
 
 from iris_validation.graphics import Panel
 from iris_validation.metrics import metrics_model_series_from_files
 
 PYTEST_RUN = 'pytest' in sys.modules
+# this is a way of making sure a dictionary parameter does not change within the
+# function so that there are not weird effects if the function is run more than once
+default_labels = MappingProxyType({'First':'First', 'Second':'Second'})
 
 def generate_report(
     first_model_path,
@@ -31,7 +59,7 @@ def generate_report(
     wrap_in_html=True,
     output_dir=None,
     output_name_prefix="report",
-    custom_labels={'First':'First', 'Second':'Second'}
+    custom_labels=default_labels
 ):
     """
     Generate a comparative or single-structure validation report from one or two structural models, 
