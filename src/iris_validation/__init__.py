@@ -22,6 +22,7 @@ Installation:
 -------------
 Available via pip, source code and most easily, through CCP4 (ccp4.ac.uk)
 """
+
 import os
 import sys
 import json
@@ -30,10 +31,11 @@ from types import MappingProxyType
 from iris_validation.graphics import Panel
 from iris_validation.metrics import metrics_model_series_from_files
 
-PYTEST_RUN = 'pytest' in sys.modules
+PYTEST_RUN = "pytest" in sys.modules
 # this is a way of making sure a dictionary parameter does not change within the
 # function so that there are not weird effects if the function is run more than once
-default_labels = MappingProxyType({'First':'First', 'Second':'Second'})
+default_labels = MappingProxyType({"First": "First", "Second": "Second"})
+
 
 def generate_report(
     first_model_path,
@@ -59,21 +61,21 @@ def generate_report(
     wrap_in_html=True,
     output_dir=None,
     output_name_prefix="report",
-    custom_labels=default_labels
+    custom_labels=default_labels,
 ):
     """
-    Generate a comparative or single-structure validation report from one or two structural models, 
-    with or without experimental data. 
+    Generate a comparative or single-structure validation report from one or two structural models,
+    with or without experimental data.
 
     This function creates a report that compares two models (or reports on a single model),
     using various metrics and visualisations. It optionally includes MolProbity validation,
-    Ramachandran Z-score calculation via Tortoize, and residue-level bar plots, selectable by 
+    Ramachandran Z-score calculation via Tortoize, and residue-level bar plots, selectable by
     using the slider on the main graphics. The labels for the two models are customisable, so
-    they can be used after refinement (e.g. 'Input' and 'Refined') or to compare different 
+    they can be used after refinement (e.g. 'Input' and 'Refined') or to compare different
     data collections (e.g. 'cryo' and 'RT')
 
-    When two models are supplied, Iris will show the second one by default and add a selector 
-    button to toggle between first and second. 
+    When two models are supplied, Iris will show the second one by default and add a selector
+    button to toggle between first and second.
 
     Parameters:
         first_model_path (str): Path to the first model file (PDB or mmCIF, mmCIF strongly preferred).
@@ -96,7 +98,7 @@ def generate_report(
         residue_bars_to_display (list, optional): List of residue-level metrics to display as bar charts.
         percentile_bar_label (str, optional): Label for the percentile bar in summary plots.
         percentile_bar_range (tuple, optional): Tuple defining the display range of the percentile bar (min, max).
-        wrap_in_html (bool, optional): If True, wraps the report in a standalone HTML page. 
+        wrap_in_html (bool, optional): If True, wraps the report in a standalone HTML page.
         output_dir (str, optional): Directory where the output report and files will be saved.
         output_name_prefix (str, optional): Prefix for the output report filename. Default is "report".
         custom_labels (dict, optional): Dictionary specifying custom labels for 'First' and 'Second' models.
@@ -106,23 +108,27 @@ def generate_report(
     """
 
     # sanitise output file name
-    output_name_prefix = output_name_prefix.replace('/','_').replace('.','_')
+    output_name_prefix = output_name_prefix.replace("/", "_").replace(".", "_")
 
-    model_series = metrics_model_series_from_files((first_model_path, second_model_path),
-                                                   (first_reflections_path, second_reflections_path),
-                                                   (first_sequence_path, second_sequence_path),
-                                                   (first_distpred_path, second_distpred_path),
-                                                   (first_model_metrics_json, second_model_metrics_json),
-                                                   run_covariance,
-                                                   run_molprobity,
-                                                   calculate_rama_z,
-                                                   data_with_percentiles,
-                                                   multiprocessing)
-    
+    model_series = metrics_model_series_from_files(
+        (first_model_path, second_model_path),
+        (first_reflections_path, second_reflections_path),
+        (first_sequence_path, second_sequence_path),
+        (first_distpred_path, second_distpred_path),
+        (first_model_metrics_json, second_model_metrics_json),
+        run_covariance,
+        run_molprobity,
+        calculate_rama_z,
+        data_with_percentiles,
+        multiprocessing,
+    )
+
     model_series_data = model_series.get_raw_data()
-    
-    if PYTEST_RUN : 
-        with open(os.path.join(output_dir, output_name_prefix + ".json"), 'w', encoding='utf8') as json_output :
+
+    if PYTEST_RUN:
+        with open(
+            os.path.join(output_dir, output_name_prefix + ".json"), "w", encoding="utf8"
+        ) as json_output:
             json.dump(model_series_data, json_output, indent=2)
 
     panel = Panel(
@@ -132,12 +138,23 @@ def generate_report(
         residue_bars_to_display=residue_bars_to_display,
         percentile_bar_label=percentile_bar_label,
         percentile_bar_range=percentile_bar_range,
-        custom_labels=custom_labels
+        custom_labels=custom_labels,
     )
     panel_string = panel.dwg.tostring()
 
     if wrap_in_html:
-        panel_string = f'<!DOCTYPE html>\n<html lang="en">\n\t<head>\n\t\t<meta charset="utf-8">\n\t\t<title>Iris Report</title>\n\t</head>\n\t<body>\n\t\t{panel_string}\n\t</body>\n</html>'
+        panel_string = (
+            f"<!DOCTYPE html>\n"
+            f'<html lang="en">\n'
+            f"\t<head>\n"
+            f'\t\t<meta charset="utf-8">\n'
+            f"\t\t<title>Iris Report</title>\n"
+            f"\t</head>\n"
+            f"\t<body>\n"
+            f"\t\t{panel_string}\n"
+            f"\t</body>\n"
+            f"</html>"
+        )
 
     if output_dir is None:
         return panel_string
@@ -145,6 +162,10 @@ def generate_report(
     if not os.path.isdir(output_dir):
         os.mkdir(output_dir)
 
-    extension = 'html' if wrap_in_html else 'svg'
-    with open(os.path.join(output_dir, f"{output_name_prefix}.{extension}"), 'w', encoding='utf8') as outfile:
+    extension = "html" if wrap_in_html else "svg"
+    with open(
+        os.path.join(output_dir, f"{output_name_prefix}.{extension}"),
+        "w",
+        encoding="utf8",
+    ) as outfile:
         outfile.write(panel_string)
