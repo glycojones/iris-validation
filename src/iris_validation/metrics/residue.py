@@ -1,6 +1,7 @@
 from math import isnan
 
 import clipper
+import gemmi
 
 from iris_validation import utils
 from iris_validation._defs import RAMACHANDRAN_THRESHOLDS
@@ -9,7 +10,7 @@ from iris_validation._defs import RAMACHANDRAN_THRESHOLDS
 class MetricsResidue:
     def __init__(
         self,
-        mmol_residue,
+        gemmi_residue,
         index_in_chain=None,
         previous_residue=None,
         next_residue=None,
@@ -21,7 +22,7 @@ class MetricsResidue:
         bfact_score=None,
         dict_ext_percentiles=None,
     ):
-        self.minimol_residue = mmol_residue
+        self.gemmi_residue = gemmi_residue
         self.initialised_with_context = index_in_chain is not None
         self.index_in_chain = index_in_chain
         self.previous_residue = previous_residue
@@ -32,11 +33,14 @@ class MetricsResidue:
         self.density_scores = density_scores
         self.rama_z = rama_z_score
 
-        self.atoms = list(mmol_residue)
-        self.sequence_number = int(mmol_residue.seqnum())
-        self.code = mmol_residue.type().trim()
-        self.code_type = utils.code_type(mmol_residue)
-        self.backbone_atoms = utils.get_backbone_atoms(mmol_residue)
+        self.atoms = list(gemmi_residue)
+        self.sequence_number = int(gemmi_residue.seqnum)
+        self.code = gemmi_residue.name
+        self.code_type = utils.code_type(gemmi_residue)
+        self.backbone_atoms = utils.get_backbone_atoms(gemmi_residue)
+        
+        ################ Continue here #################
+        
         self.backbone_atoms_are_correct = None not in self.backbone_atoms
         self.backbone_geometry_is_correct = utils.check_backbone_geometry(mmol_residue) if self.backbone_atoms_are_correct else None
         self.is_aa = utils.check_is_aa(mmol_residue)

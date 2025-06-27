@@ -1,6 +1,6 @@
 from math import acos, atan2, degrees
 
-import clipper
+import gemmi
 
 
 THREE_LETTER_CODES = { 0 : [ 'ALA', 'GLY', 'VAL', 'LEU', 'ILE', 'PRO', 'PHE', 'TYR', 'TRP', 'SER',
@@ -255,56 +255,56 @@ def needleman_wunsch(seq1, seq2, match_award=1, mismatch_penalty=-1, gap_penalty
     return alignment1, alignment2
 
 
-# (MiniMol) residue functions
-def code_type(mmol_residue):
+# Gemmi residue functions
+def code_type(gemmi_residue):
     try:
-        return next(category for category, group in THREE_LETTER_CODES.items() if mmol_residue.type().trim() in group)
+        return next(category for category, group in THREE_LETTER_CODES.items() if gemmi_residue.name in group)
     except StopIteration:
         return None
 
 
-def get_backbone_atoms(mmol_residue):
+def get_backbone_atoms(gemmi_residue):
     try:
-        n = next(atom for atom in mmol_residue if atom.id().trim().replace(' ', '') == 'N' or atom.id().trim().replace(' ', '') == 'N:A')
+        n = next(atom for atom in gemmi_residue if atom.name.replace(' ', '') == 'N' or atom.name.replace(' ', '') == 'N:A')
     except StopIteration:
         n = None
     try:
-        ca = next(atom for atom in mmol_residue if atom.id().trim().replace(' ', '') == 'CA' or atom.id().trim().replace(' ', '') == 'CA:A')
+        ca = next(atom for atom in gemmi_residue if atom.name.replace(' ', '') == 'CA' or atom.name.replace(' ', '') == 'CA:A')
     except StopIteration:
         ca = None
     try:
-        c = next(atom for atom in mmol_residue if atom.id().trim().replace(' ', '') == 'C' or atom.id().trim().replace(' ', '') == 'C:A')
+        c = next(atom for atom in gemmi_residue if atom.name.replace(' ', '') == 'C' or atom.name.replace(' ', '') == 'C:A')
     except StopIteration:
         c = None
     return n, ca, c
 
 
-def check_backbone_geometry(mmol_residue):
-    n, ca, c = get_backbone_atoms(mmol_residue)
-    n_co = n.coord_orth()
-    ca_co = ca.coord_orth()
-    c_co = c.coord_orth()
-    xyz_n = (n_co.x(), n_co.y(), n_co.z())
-    xyz_ca = (ca_co.x(), ca_co.y(), ca_co.z())
-    xyz_c = (c_co.x(), c_co.y(), c_co.z())
+def check_backbone_geometry(gemmi_residue):
+    n, ca, c = get_backbone_atoms(gemmi_residue)
+    n_co = n.pos
+    ca_co = ca.pos
+    c_co = c.pos
+    xyz_n = (n_co.x, n_co.y, n_co.z)
+    xyz_ca = (ca_co.x, ca_co.y, ca_co.z)
+    xyz_c = (c_co.x, c_co.y, c_co.z)
     dist_n_ca = distance(xyz_n, xyz_ca)
     dist_ca_c = distance(xyz_ca, xyz_c)
     return dist_n_ca < 1.8 and dist_ca_c < 1.8
 
 
-def calculate_chis(mmol_residue):
+def calculate_chis(gemmi_residue):
     chis = [ ]
     for i in range(5):
         chi_atoms = [ ]
-        has_chi = any(mmol_residue.type().trim() in residues for residues in list(CHI_ATOMS[i].values()))
+        has_chi = any(gemmi_residue.name in residues for residues in list(CHI_ATOMS[i].values()))
         if not has_chi:
             return chis
-        required_atom_names = next(atoms for atoms, residues in CHI_ATOMS[i].items() if mmol_residue.type().trim() in residues)
+        required_atom_names = next(atoms for atoms, residues in CHI_ATOMS[i].items() if gemmi_residue.name in residues)
         missing_atom_names = [ ]
         for required_atom_name in required_atom_names:
             found = False
-            for atom in mmol_residue:
-                atom_name = atom.id().trim().replace(' ', '')
+            for atom in gemmi_residue:
+                atom_name = atom.name.replace(' ', '')
                 if atom_name in (required_atom_name, required_atom_name + ':A'):
                     chi_atoms.append(atom)
                     found = True
@@ -313,11 +313,11 @@ def calculate_chis(mmol_residue):
         if len(chi_atoms) < 4:
             chis.append(None)
             continue
-        xyzs = [ (atom.coord_orth().x(), atom.coord_orth().y(), atom.coord_orth().z()) for atom in chi_atoms ]
+        xyzs = [ (atom.pos.x, atom.pos.y, atom.pos.z) for atom in chi_atoms ]
         chis.append(torsion(xyzs[0], xyzs[1], xyzs[2], xyzs[3]))
     return tuple(chis)
 
-
+############ Continue here #################
 def analyse_b_factors(mmol_residue, is_aa=None, backbone_atoms=None):
     if is_aa is None:
         is_aa = check_is_aa(mmol_residue)
