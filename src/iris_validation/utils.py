@@ -317,18 +317,18 @@ def calculate_chis(gemmi_residue):
         chis.append(torsion(xyzs[0], xyzs[1], xyzs[2], xyzs[3]))
     return tuple(chis)
 
-############ Continue here #################
-def analyse_b_factors(mmol_residue, is_aa=None, backbone_atoms=None):
+
+def analyse_b_factors(gemmi_residue, is_aa=None, backbone_atoms=None):
     if is_aa is None:
-        is_aa = check_is_aa(mmol_residue)
+        is_aa = check_is_aa(gemmi_residue)
     if backbone_atoms is None:
-        backbone_atoms = get_backbone_atoms(mmol_residue)
+        backbone_atoms = get_backbone_atoms(gemmi_residue)
     if is_aa:
-        backbone_atom_ids = set([ str(atom.id()).strip() for atom in backbone_atoms ])
+        backbone_atom_ids = set([ atom.name for atom in backbone_atoms ])
     residue_b_factors, mc_b_factors, sc_b_factors = [ ], [ ], [ ]
-    for atom in mmol_residue:
-        atom_id = str(atom.id()).strip()
-        bf = clipper.Util_u2b(atom.u_iso())
+    for atom in gemmi_residue:
+        atom_id = atom.name
+        bf = atom.b_iso
         residue_b_factors.append(bf)
         if is_aa:
             if atom_id in backbone_atom_ids:
@@ -343,23 +343,28 @@ def analyse_b_factors(mmol_residue, is_aa=None, backbone_atoms=None):
     return b_max, b_avg, b_stdev, mc_b_avg, sc_b_avg
 
 
-def check_is_aa(mmol_residue, strict=False):
+def check_is_aa(gemmi_residue, strict=False):
     allowed_types = (0,) if strict else (0, 1)
-    if code_type(mmol_residue) in allowed_types and \
-       None not in get_backbone_atoms(mmol_residue) and \
-       check_backbone_geometry(mmol_residue):
+    if code_type(gemmi_residue) in allowed_types and \
+       None not in get_backbone_atoms(gemmi_residue) and \
+       check_backbone_geometry(gemmi_residue):
         return True
     return False
 
+def calculate_omega(gemmi_residue, gemmi_next_residue):
+    if gemmi_residue is not None and gemmi_next_residue is not None :
+        return degrees(gemmi.calculate_omega (gemmi_residue, gemmi_next_residue))
+    return 0.0
 
-def get_rama_calculator(mmol_residue, code=None):
+# CONTINUE HERE
+def get_rama_calculator(gemmi_residue, code=None):
     if code is None:
-        code = mmol_residue.type().trim()
+        code = gemmi_residue.name
     if code == 'GLY':
         return clipper.Ramachandran(clipper.Ramachandran.Gly2)
-    elif code == 'PRO':
+    if code == 'PRO':
         return clipper.Ramachandran(clipper.Ramachandran.Pro2)
-    elif code in ('ILE', 'VAL'):
+    if code in ('ILE', 'VAL'):
         return clipper.Ramachandran(clipper.Ramachandran.IleVal2)
     else:
         return clipper.Ramachandran(clipper.Ramachandran.NoGPIVpreP2)
