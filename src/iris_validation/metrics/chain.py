@@ -4,7 +4,7 @@ from iris_validation.metrics.residue import MetricsResidue
 class MetricsChain:
     def __init__(
         self,
-        mmol_chain,
+        gemmi_chain,
         parent_model=None,
         covariance_data=None,
         molprobity_data=None,
@@ -14,7 +14,7 @@ class MetricsChain:
         check_resnum=False,
         data_with_percentiles=None,
     ):
-        self.minimol_chain = mmol_chain
+        self.gemmi_chain = gemmi_chain
         self.parent_model = parent_model
         self.covariance_data = covariance_data
         self.molprobity_data = molprobity_data
@@ -23,14 +23,14 @@ class MetricsChain:
 
         self._index = -1
         self.residues = [ ]
-        self.length = len(mmol_chain)
-        self.chain_id = str(mmol_chain.id().trim())
+        self.length = len(gemmi_chain)
+        self.chain_id = gemmi_chain.name
         dict_ext_percentiles = {}  # stores the percentiles supplied externally
-        for residue_index, mmol_residue in enumerate(mmol_chain):
-            previous_residue = mmol_chain[residue_index-1] if residue_index > 0 else None
-            next_residue = mmol_chain[residue_index+1] if residue_index < len(mmol_chain)-1 else None
-            seq_num = int(mmol_residue.seqnum())
-            res_id = str(mmol_residue.id()).strip()
+        for residue_index, gemmi_residue in enumerate(gemmi_chain):
+            previous_residue = gemmi_chain[residue_index-1] if residue_index > 0 else None
+            next_residue = gemmi_chain[residue_index+1] if residue_index < len(gemmi_chain)-1 else None
+            seq_num = gemmi_residue.seqid
+            res_id = gemmi_residue.name
             # covariance
             residue_covariance_data = get_data_from_dict(covariance_data,
                 id=res_id,seq_num=seq_num,check_resnum=check_resnum)
@@ -61,7 +61,7 @@ class MetricsChain:
                 with_percentiles=data_with_percentiles,percentile_key="b_factor",
                 dict_ext_percentiles=dict_ext_percentiles)
             residue = MetricsResidue(
-                mmol_residue,
+                gemmi_residue,
                 residue_index,
                 previous_residue,
                 next_residue,
@@ -137,7 +137,6 @@ def get_data_from_dict(data_dict, id, seq_num, check_resnum, with_percentiles=No
         if with_percentiles and percentile_key in with_percentiles:
             dict_ext_percentiles[percentile_key] = data_dict[id][-1]
             return data_dict[id][0]
-        else:
-            return data_dict[id]
+        return data_dict[id]
     except KeyError:
         return None

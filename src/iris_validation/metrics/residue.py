@@ -1,6 +1,5 @@
 from math import isnan
 
-import clipper
 import gemmi
 
 from iris_validation import utils
@@ -34,39 +33,38 @@ class MetricsResidue:
         self.rama_z = rama_z_score
 
         self.atoms = list(gemmi_residue)
-        self.sequence_number = int(gemmi_residue.seqnum)
+        self.sequence_number = gemmi_residue.seqid
         self.code = gemmi_residue.name
         self.code_type = utils.code_type(gemmi_residue)
         self.backbone_atoms = utils.get_backbone_atoms(gemmi_residue)
         
-        ################ Continue here #################
-        
         self.backbone_atoms_are_correct = None not in self.backbone_atoms
-        self.backbone_geometry_is_correct = utils.check_backbone_geometry(mmol_residue) if self.backbone_atoms_are_correct else None
-        self.is_aa = utils.check_is_aa(mmol_residue)
-        self.is_water = str(mmol_residue.type()).strip() == 'HOH'
+        self.backbone_geometry_is_correct = utils.check_backbone_geometry(gemmi_residue) if self.backbone_atoms_are_correct else None
+        self.is_aa = utils.check_is_aa(gemmi_residue)
+        self.is_water = gemmi_residue.name == 'HOH'
         self.is_consecutive_aa = None
 
         # B-factors
-        self.max_b_factor, self.avg_b_factor, self.std_b_factor, self.mc_b_factor, self.sc_b_factor = utils.analyse_b_factors(mmol_residue, self.is_aa, self.backbone_atoms)
+        self.max_b_factor, self.avg_b_factor, self.std_b_factor, self.mc_b_factor, self.sc_b_factor = utils.analyse_b_factors(gemmi_residue, self.is_aa, self.backbone_atoms)
         # override precalculated
         if bfact_score:
             self.avg_b_factor, self.std_b_factor = bfact_score
 
         # Backbone torsion angles
-        self.phi = clipper.MMonomer.protein_ramachandran_phi(self.previous_residue, mmol_residue) if self.previous_residue else None
-        self.psi = clipper.MMonomer.protein_ramachandran_psi(mmol_residue, self.next_residue) if self.next_residue else None
-        if self.phi is not None and isnan(self.phi):
+        self.phi, self.psi = gemmi.calculate_phi_psi(self.previous_residue, gemmi_residue, self.next_residue) if self.previous_residue and self.next_residue else None, None
+
+        # The following bit might not be required for gemmi
+        if self.phi is not None and isnan(self.phi): 
             self.phi = None
         if self.psi is not None and isnan(self.psi):
             self.psi = None
 
         # Side chain torsion angles
-        self.chis = utils.calculate_chis(mmol_residue) if self.is_aa else None
+        self.chis = utils.calculate_chis(gemmi_residue) if self.is_aa else None
         self.is_sidechain_complete = self.chis is not None and None not in self.chis
 
         # Ramachandran
-        self.ramachandran_score = utils.calculate_ramachandran_score(mmol_residue, self.code, self.phi, self.psi)
+        self.ramachandran_score = utils.calculate_ramachandran_score(gemmi_residue, self.code, self.phi, self.psi)
         self.ramachandran_flags = (None, None, None)
         if self.ramachandran_score is not None:
             if RAMACHANDRAN_THRESHOLDS[0] <= self.ramachandran_score:
