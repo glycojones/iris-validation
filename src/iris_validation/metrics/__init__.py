@@ -216,14 +216,21 @@ def _get_tortoize_data(model_path, seq_nums, model_id=None, out_queue=None):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
+    
     try:
         tortoize_output, tortoize_stderr = tortoize_process.communicate()
-        if tortoize_process.returncode != 0 or tortoize_stderr:
-            print("WARNING: Failed to run tortoize")
-        tortoize_dict = json.loads(tortoize_output)
-    except Exception:
-        print("WARNING: Failed to read tortoize output")
+        # Explicitly check for content before loading
+        if tortoize_output:
+            tortoize_dict = json.loads(tortoize_output.decode('utf-8'))
+        else:
+            print("No output received from tortoize")
+            print(f"Captured stderr: {tortoize_stderr}")
+            return
+    except (json.JSONDecodeError, UnicodeDecodeError, ValueError) as e:
+        print(f"Failed to parse JSON: {e}")
+        print(f"Captured stderr: {tortoize_stderr}")
         return
+
     rama_z_data = {
         "rama_jack_sd" : None,
         "rama_z_overall" : None,

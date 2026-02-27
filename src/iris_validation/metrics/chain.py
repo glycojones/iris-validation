@@ -45,14 +45,19 @@ class MetricsChain:
             # rama_z
             if rama_z_data is None:
                 residue_rama_z_score = None
+                residue_ss_annotation = None
             elif check_resnum:
                 try:
+                    # The following will be run when data are input as .json (CCP-EM)
                     residue_rama_z_score = rama_z_data[res_id]
                 except KeyError:
                     residue_rama_z_score = None
             else:
                 try:
-                    residue_rama_z_score = rama_z_data[seq_num]
+                    # In this case, we get rama_z and also secondary structure annotations 
+                    #   as 'helix', 'strand' and 'other'
+                    residue_rama_z_score  = rama_z_data[seq_num]["z-score"]
+                    residue_ss_annotation = rama_z_data[seq_num]["ss-type"]
                 except KeyError:
                     residue_rama_z_score = None
             # ext b-factor
@@ -69,6 +74,7 @@ class MetricsChain:
                 residue_covariance_data,
                 residue_molprobity_data,
                 residue_density_scores,
+                # need to insert residue_ss_annotation here
                 residue_rama_z_score,
                 residue_bfact_score,
                 dict_ext_percentiles,
