@@ -227,6 +227,9 @@ def _get_tortoize_data(model_path, seq_nums, model_id=None, out_queue=None):
         return
 
     residues = tortoize_dict["model"]["1"]["residues"]
+    rama_jack_sd = tortoize_dict["model"]["1"]["ramachandran-jackknife-sd"]
+    rama_z_overall = tortoize_dict["model"]["1"]["ramachandran-z"]
+    
     for res in residues:
         rama_z_data[res["pdb"]["strandID"]][res["pdb"]["seqNum"]] = res["ramachandran"][
             "z-score"
@@ -250,6 +253,25 @@ def metrics_model_series_from_files(
     data_with_percentiles=None,
     multiprocessing=True,
 ):
+    """
+    Calculates a series of structural metrics for multiple model files.
+
+    Args:
+        model_paths (list[str]): List of paths to PDB/mmCIF model files.
+        reflections_paths (list[str], optional): Paths to experimental data (MTZ/cif).
+        sequence_paths (list[str], optional): Paths to fasta files for validation.
+        distpred_paths (list[str], optional): Paths to distance prediction files.
+        model_json_paths (list[str], optional): Paths to existing model metadata.
+        run_covariance (bool): If True, performs covariance/evolutionary analysis.
+        run_molprobity (bool): If True, executes MolProbity geometric validation.
+        calculate_rama_z (bool): If True, computes the Ramachandran Z-score.
+        data_with_percentiles (dict/DataFrame, optional): Reference data to 
+        calculate relative performance percentiles.
+        multiprocessing (bool): If True, distributes calculations across CPU cores.
+
+    Returns:
+        pd.DataFrame: A collection of metrics for each model in the series.
+    """
 
     path_lists = [
         model_paths,
@@ -289,7 +311,7 @@ def metrics_model_series_from_files(
         # load external metric data from the provided json file path
         if json_data_path:
             check_resnum = True
-            with open(json_data_path, "r") as j:
+            with open(json_data_path, "r", encoding="utf-8") as j:
                 json_data = json.load(j)
             for metric in json_data:
                 if metric == "molprobity":
