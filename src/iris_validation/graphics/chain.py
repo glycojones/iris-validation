@@ -79,8 +79,14 @@ class ChainView:
             for segment_id, residue_valid in enumerate(residue_validities):
                 if not residue_valid:
                     shade_group.add(self.dwg.polygon([ self.center,
-                                                       self._coords_from_angle(self.angle_delta * segment_id, self.full_radius+5),
-                                                       self._coords_from_angle(self.angle_delta * (segment_id+1), self.full_radius+5) ],
+                                                       self._coords_from_angle(
+                                                           self.angle_delta * segment_id, 
+                                                           self.full_radius+5
+                                                        ),
+                                                       self._coords_from_angle(
+                                                           self.angle_delta * (segment_id+1), 
+                                                           self.full_radius+5
+                                                        ) ],
                                                        stroke_opacity=0,
                                                        fill=COLORS['L_PINK'],
                                                        fill_opacity=1))

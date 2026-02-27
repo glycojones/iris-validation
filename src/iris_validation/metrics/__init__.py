@@ -210,7 +210,6 @@ def _get_covariance_data(
 
 
 def _get_tortoize_data(model_path, seq_nums, model_id=None, out_queue=None):
-    rama_z_data = {chain_id: {} for chain_id in seq_nums.keys()}
     tortoize_process = subprocess.Popen(
         ["tortoize", str(model_path)],
         shell=False,  # False because Linux shell expects whole command in a string not a list
@@ -225,15 +224,19 @@ def _get_tortoize_data(model_path, seq_nums, model_id=None, out_queue=None):
     except Exception:
         print("WARNING: Failed to read tortoize output")
         return
-
+    rama_z_data = {
+        "rama_jack_sd" : None,
+        "rama_z_overall" : None,
+        "residues" : { chain_id: {} for chain_id in seq_nums.keys()}
+    }
     residues = tortoize_dict["model"]["1"]["residues"]
-    rama_jack_sd = tortoize_dict["model"]["1"]["ramachandran-jackknife-sd"]
-    rama_z_overall = tortoize_dict["model"]["1"]["ramachandran-z"]
-    
+    rama_z_data["rama_jack_sd"]   = tortoize_dict["model"]["1"]["ramachandran-jackknife-sd"]
+    rama_z_data["rama_z_overall"] = tortoize_dict["model"]["1"]["ramachandran-z"]
     for res in residues:
-        rama_z_data[res["pdb"]["strandID"]][res["pdb"]["seqNum"]] = res["ramachandran"][
-            "z-score"
-        ]
+        rama_z_data["residues"][res["pdb"]["strandID"]][res["pdb"]["seqNum"]] = {
+            "z-score": res["ramachandran"]["z-score"], 
+            "ss-type" : res["ramachandran"]["ss-type"] 
+        }
 
     if out_queue is not None:
         out_queue.put(("rama_z", model_id, rama_z_data))

@@ -37,7 +37,13 @@ class MetricsModel:
             chain_covariance_data = None if covariance_data is None else covariance_data[chain_id]
             chain_molprobity_data = None if molprobity_data is None else molprobity_data[chain_id]
             chain_density_scores = None if self.density_scores is None else self.density_scores[chain_id]
-            chain_rama_z_data = None if rama_z_data is None else rama_z_data[chain_id]
+            
+            try:
+                chain_rama_z_data = None if rama_z_data is None else rama_z_data["residues"][chain_id]
+            except KeyError:
+                # Simple rama_z data coming in a .json file, no secondary structure annotation
+                chain_rama_z_data = rama_z_data[chain_id]
+            
             chain_bfactor_data = (
                 None if bfactor_data is None else bfactor_data[chain_id]
             )
